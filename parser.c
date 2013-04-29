@@ -415,7 +415,7 @@ bool_t dest_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             if(0 == strcmp(psToken->pcToken, "("))
             {
-                printf("TEMP4 = %d,%d\n", sStack[uiTop-1].eState, sStack[uiTop-1].uiCount);
+                printf("TEMP3 = %d,%d\n", sStack[uiTop-1].eState, sStack[uiTop-1].uiCount);
                 eParserState = PROCEDURE_CALL;
             }
             else
