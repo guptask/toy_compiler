@@ -1,0 +1,12 @@
++------------+
+|   README   |
++------------+
+
+To build the code, type:   make
+
+To build the ctags, type:  ./make-ctags
+
+To execute the code, type: ./compile <code_file>
+
+Note: 'code' is a demo test file in this directory
+
