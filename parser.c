@@ -467,6 +467,7 @@ bool_t loop_statement( tokenListEntry_t *psToken )
         case 7:
         {
             if(0 != strcmp(psToken->pcToken, "for")) return FALSE;
+            (void) stackPop();
         } break;
 
         default: return FALSE;
@@ -507,12 +508,6 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 5:
         {
-            if(0 != strcmp(psToken->pcToken, ")")) return FALSE;
-            eParserState = STATEMENT;
-        } break;
-
-        case 6:
-        {
             if(0 == strcmp(psToken->pcToken, "else"))
             {
                 eParserState = STATEMENT;
@@ -523,14 +518,15 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
         } break;
 
-        case 7:
+        case 6:
         {
             if(0 != strcmp(psToken->pcToken, "end")) return FALSE;
         } break;
 
-        case 8:
+        case 7:
         {
             if(0 != strcmp(psToken->pcToken, "if")) return FALSE;
+            (void) stackPop();
         } break;
 
         default: return FALSE;
