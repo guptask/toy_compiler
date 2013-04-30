@@ -121,6 +121,13 @@ stackState_t *stackPop()
     return &sStack[uiTop];
 }
 
+/* State stack re-arrangement for re-sync */
+void parseRuleReSync()
+{
+    printf("\nRE-SYNC\n\n");
+    return;
+}
+
 /* <array_size> ::= <number> and
    <number> ::= [0-9][0-9_]*[.[0-9_]*] (combined since no further expansion)
 */
@@ -1320,12 +1327,20 @@ void parse( tokenListEntry_t *psTokenList )
 
         if( TRUE != bIsRetSucc )
         {
-            printf("Parsing error before or for token '%s' on line no. %u.\n", 
+            printf("Parsing error before or for token '%s' on line no. %u. Re-syncing...\n", 
                             psTempList->pcToken, psTempList->uiLineNum);
-            return;
+
+            /* Re-sync */
+            bIsIncrNeeded = TRUE;
+            parseRuleReSync();
+            do
+            {
+                psTempList = psTempList->psNextToken;
+            }
+            while( (NULL != psTempList) && (0 != strcmp(psTempList->pcToken, ";")) );
         }
 
-        if( TRUE == bIsIncrNeeded )
+        if( (TRUE == bIsIncrNeeded) && (NULL != psTempList) )
         {
             psTempList = psTempList->psNextToken;
         }
