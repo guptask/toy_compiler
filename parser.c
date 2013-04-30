@@ -688,7 +688,7 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
                     return FALSE;
                 }
                 (void) stackPop();
-                printf("TEMP-2\n");
+                printf("TEMP2\n");
                 *bIsTokIncrNeeded = FALSE;
             }
         } break;
