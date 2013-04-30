@@ -385,15 +385,18 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 }
 
 /* <identifier> ::= [a-zA-Z][a-zA-Z0-9_]* */
-bool_t identifiers( tokenListEntry_t *psToken )
+bool_t identifiers( tokenListEntry_t *psToken, bool_t bIsStkPopNeed )
 {
     if( IDENTIFIER != getTokenTypeFromTokTab(psToken) )
     {
-        printf("'%s' not an identifier.\n", psToken->pcToken);
+        //printf("'%s' not an identifier.\n", psToken->pcToken);
         return FALSE;
     }
 
-    (void) stackPop();
+    if( TRUE == bIsStkPopNeed )
+    {
+        (void) stackPop();
+    }
 
     return TRUE;
 }
@@ -403,28 +406,18 @@ bool_t identifiers( tokenListEntry_t *psToken )
 */
 bool_t dest_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
-    switch( (sStack[uiTop-1].uiCount)%2 )
-    {
-        case 0:
-        {
-            (void) stackPop();
-            //*bIsTokIncrNeeded = FALSE;
-        } break;
+    (void) stackPop();
+    *bIsTokIncrNeeded = FALSE;
 
-        case 1:
-        {
-            if(0 == strcmp(psToken->pcToken, "("))
-            {
-                printf("TEMP3 = %d,%d\n", sStack[uiTop-1].eState, sStack[uiTop-1].uiCount);
-                eParserState = PROCEDURE_CALL;
-            }
-            else
-            {
-                eParserState = ASSIGNMENT_STATEMENT;
-            }
-            *bIsTokIncrNeeded = FALSE;
-        } break;
+    if(0 == strcmp(psToken->pcToken, "("))
+    {
+        eParserState = PROCEDURE_CALL;
     }
+    else
+    {
+        eParserState = ASSIGNMENT_STATEMENT;
+    }
+
     return TRUE;
 }
 
@@ -450,7 +443,7 @@ bool_t loop_statement( tokenListEntry_t *psToken )
 
         case 3:
         {
-            if (TRUE != identifiers(psToken)) return FALSE;
+            if (TRUE != identifiers(psToken, FALSE)) return FALSE;
             eParserState = ASSIGNMENT_STATEMENT;
         } break;
 
@@ -652,7 +645,6 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
     {
         case 0:
         {
-            printf("TEMP-0\n");
             if(0 != strcmp(psToken->pcToken, ";"))
             {
                 return FALSE;
@@ -661,7 +653,6 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
 
         case 1:
         {
-            printf("TEMP-1\n");
             if(0 == strcmp(psToken->pcToken, "if"))
             {
                 eParserState = IF_STATEMENT;
@@ -672,11 +663,8 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
                 eParserState = LOOP_STATEMENT;
                 *bIsTokIncrNeeded = FALSE;
             }
-            else if(0 == strcmp(psToken->pcToken, "return"))
-            {
-                printf("TEMP1\n");
-            }
-            else if (TRUE == identifiers(psToken))
+            else if(0 == strcmp(psToken->pcToken, "return")) {}
+            else if (TRUE == identifiers(psToken, FALSE))
             {
                 eParserState = DEST_OR_PROC_CALL;
             }
@@ -688,7 +676,6 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
                     return FALSE;
                 }
                 (void) stackPop();
-                printf("TEMP2\n");
                 *bIsTokIncrNeeded = FALSE;
             }
         } break;
@@ -744,6 +731,7 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             {
                 return FALSE;
             }
+            (void) stackPop();
         } break;
     }
     return TRUE;
@@ -1266,7 +1254,7 @@ void parse( tokenListEntry_t *psTokenList )
             case IDENTIFIERS:
             {
                 printf("identifiers: %s\n", psTempList->pcToken);
-                bIsRetSucc = identifiers( psTempList );
+                bIsRetSucc = identifiers( psTempList, TRUE );
             } break;
 
             case EXPRESSION:
