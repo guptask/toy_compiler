@@ -125,6 +125,19 @@ stackState_t *stackPop()
 void parseRuleReSync()
 {
     printf("\nRE-SYNC\n\n");
+    if( (PROGRAM_BODY   == sStack[uiTop-1].eState) || 
+        (PROCEDURE_BODY == sStack[uiTop-1].eState)    )
+    {
+        if( 1 == sStack[uiTop-1].uiCount )
+        {
+            eParserState = DECLARATION;
+        }
+        else
+        {
+            eParserState = STATEMENT;
+            sStack[uiTop-1].uiCount--;
+        }
+    }
     return;
 }
 
