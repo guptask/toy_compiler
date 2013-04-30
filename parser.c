@@ -1145,26 +1145,26 @@ void parse( tokenListEntry_t *psTokenList )
         {
             case PROGRAM:
             {
-                printf("program: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("program: %s\n", psTempList->pcToken);
                 bIsRetSucc = program( psTempList, &bIsIncrNeeded );
             } break;
 
             case PROGRAM_HEADER:
             {
-                printf("program_header: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("program_header: %s\n", psTempList->pcToken);
                 bIsRetSucc = program_header( psTempList, &bIsIncrNeeded );
             } break;
 
             case PROGRAM_BODY:
             {
-                printf("program_body: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("program_body: %s\n", psTempList->pcToken);
                 bIsRetSucc = program_body( psTempList, &bIsIncrNeeded );
             } break;
 
             case DECLARATION:
             {
                 bIsRetSucc = FALSE;
-                printf("declaration: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("declaration: %s\n", psTempList->pcToken);
                 if( PROGRAM_BODY == sStack[uiTop-2].eState )
                 {
                     bIsRetSucc = declaration( psTempList, TRUE, &bIsIncrNeeded );
@@ -1177,43 +1177,43 @@ void parse( tokenListEntry_t *psTokenList )
 
             case PROCEDURE_DECLARATION:
             {
-                printf("procedure_declaration: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("procedure_declaration: %s\n", psTempList->pcToken);
                 bIsRetSucc = procedure_declaration( psTempList, &bIsIncrNeeded );
             } break;
 
             case PROCEDURE_HEADER:
             {
-                printf("procedure_header: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("procedure_header: %s\n", psTempList->pcToken);
                 bIsRetSucc = procedure_header( psTempList, &bIsIncrNeeded );
             } break;
 
             case PARAMETER_LIST:
             {
-                printf("parameter_list: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("parameter_list: %s\n", psTempList->pcToken);
                 bIsRetSucc = parameter_list( psTempList, &bIsIncrNeeded );
             } break;
 
             case PARAMETER:
             {
-                printf("parameter: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("parameter: %s\n", psTempList->pcToken);
                 bIsRetSucc = parameter( psTempList, &bIsIncrNeeded );
             } break;
 
             case PROCEDURE_BODY:
             { 
-                printf("procedure_body: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("procedure_body: %s\n", psTempList->pcToken);
                 bIsRetSucc = procedure_body( psTempList, &bIsIncrNeeded );
             } break;
 
             case VARIABLE_DECLARATION:
             {
-                printf("variable_declaration: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("variable_declaration: %s\n", psTempList->pcToken);
                 bIsRetSucc = variable_declaration( psTempList, &bIsIncrNeeded );
             } break;
 
             case STATEMENT:
             {
-                printf("statement: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("statement: %s\n", psTempList->pcToken);
                 if( IF_STATEMENT == sStack[uiTop-2].eState )
                 {
                     bIsRetSucc = statement( psTempList, &bIsIncrNeeded, TRUE );
@@ -1226,85 +1226,85 @@ void parse( tokenListEntry_t *psTokenList )
 
             case PROCEDURE_CALL:
             {
-                printf("procedure_call: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("procedure_call: %s\n", psTempList->pcToken);
                 bIsRetSucc = procedure_call( psTempList, &bIsIncrNeeded );
             } break;
 
             case ASSIGNMENT_STATEMENT:
             {
-                printf("assignment_statement: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("assignment_statement: %s\n", psTempList->pcToken);
                 bIsRetSucc = assignment_statement( psTempList, &bIsIncrNeeded );
             } break;
 
             case IF_STATEMENT:
             {
-                printf("if_statement: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("if_statement: %s\n", psTempList->pcToken);
                 bIsRetSucc = if_statement( psTempList, &bIsIncrNeeded );
             } break;
 
             case LOOP_STATEMENT:
             {
-                printf("loop_statement: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("loop_statement: %s\n", psTempList->pcToken);
                 bIsRetSucc = loop_statement( psTempList );
             } break;
 
             case DEST_OR_PROC_CALL:
             {
-                printf("dest_or_proc_call: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("dest_or_proc_call: %s\n", psTempList->pcToken);
                 bIsRetSucc = dest_or_proc_call( psTempList, &bIsIncrNeeded );
             } break;
 
             case IDENTIFIERS:
             {
-                printf("identifiers: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("identifiers: %s\n", psTempList->pcToken);
                 bIsRetSucc = identifiers( psTempList, TRUE );
             } break;
 
             case EXPRESSION:
             {
-                printf("expression: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("expression: %s\n", psTempList->pcToken);
                 bIsRetSucc = expression( psTempList, &bIsIncrNeeded );
             } break;
 
             case ARITH_OP:
             {
-                printf("arith_op: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("arith_op: %s\n", psTempList->pcToken);
                 bIsRetSucc = arith_op( psTempList, &bIsIncrNeeded );
             } break;
 
             case RELATION:
             {
-                printf("relation: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("relation: %s\n", psTempList->pcToken);
                 bIsRetSucc = relation( psTempList, &bIsIncrNeeded );
             } break;
 
             case TERM:
             {
-                printf("term: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("term: %s\n", psTempList->pcToken);
                 bIsRetSucc = term( psTempList, &bIsIncrNeeded );
             } break;
 
             case FACTOR:
             {
-                printf("factor: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("factor: %s\n", psTempList->pcToken);
                 bIsRetSucc = factor( psTempList, &bIsIncrNeeded );
             } break;
 
             case NAME:
             {
-                printf("name: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("name: %s\n", psTempList->pcToken);
                 bIsRetSucc = name( psTempList, &bIsIncrNeeded );
             } break;
 
             case ARGUMENT_LIST:
             {
-                printf("argument_list: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("argument_list: %s\n", psTempList->pcToken);
                 bIsRetSucc = argument_list( psTempList, &bIsIncrNeeded );
             } break;
 
             case NUMBERS:
             {
-                printf("numbers: %s\n", psTempList->pcToken);
+                if(DEBUG_FLAG) printf("numbers: %s\n", psTempList->pcToken);
                 bIsRetSucc = numbers( psTempList );
             } break;
 
@@ -1320,7 +1320,7 @@ void parse( tokenListEntry_t *psTokenList )
 
             default:
             {
-                printf("Rule no. %d still remains unhandled.\n", eParserState);
+                if(DEBUG_FLAG) printf("Rule no. %d still remains unhandled.\n", eParserState);
                 return;
             }
         }

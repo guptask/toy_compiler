@@ -40,15 +40,16 @@ int main( int argc, char *argv[] )
     /* Close the code file */
     fclose( fpCode );
 
-//#if 0
     /* Print the tokens generated */
-    tokenListEntry_t *psTempStream = psTokenStream;
-    while(psTempStream)
+    if(DEBUG_FLAG)
     {
-        printf("Line %u: \"%s\"\n", psTempStream->uiLineNum, psTempStream->pcToken);
-        psTempStream = psTempStream->psNextToken;
+        tokenListEntry_t *psTempStream = psTokenStream;
+        while(psTempStream)
+        {
+            printf("Line %u: \"%s\"\n", psTempStream->uiLineNum, psTempStream->pcToken);
+            psTempStream = psTempStream->psNextToken;
+        }
     }
-//#endif
 
     /* Parse the code */
     parse(psTokenStream);
