@@ -138,6 +138,9 @@ void parseRuleReSync()
             sStack[uiTop-1].uiCount--;
         }
     }
+
+    /* NOTE: Need to handle loop_assignment rule */
+
     return;
 }
 
