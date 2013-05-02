@@ -124,7 +124,7 @@ stackState_t *stackPop()
 /* State stack re-arrangement for re-sync */
 void parseRuleReSync()
 {
-    printf("\nRE-SYNC\n\n");
+    /* Re-sync needed if current state is program_body or procedure_body */
     if( (PROGRAM_BODY   == sStack[uiTop-1].eState) || 
         (PROCEDURE_BODY == sStack[uiTop-1].eState)    )
     {
