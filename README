@@ -10,3 +10,15 @@ To execute the code, type: ./compile <code_file>
 
 Note: 'code' is a demo test file in this directory
 
+
+Assumptions list :
+----------------
+
+1. 'global' keyword is valid only for 
+   <program_body> -> <declaration> , not for 
+   <procedure_body> -> <declaration>
+
+2. A local variable name is unique inside a 
+   procedure, but can be re-used across 
+   different procedures
+
