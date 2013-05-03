@@ -73,7 +73,8 @@ typedef struct program_s
 } program_t;
 
 
-
+/* Extern declaration section */
+extern program_t *psProgram;
 
 
 

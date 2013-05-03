@@ -53,6 +53,10 @@ parserState_t eParserState = PROGRAM;
 stackState_t sStack[STACK_SIZE];
 unsigned int uiTop = 0;
 
+/* Type checking variables */
+program_t    *psProgram     = NULL;
+unsigned int uiNestingLevel = 0;
+
 
 /* Definition section */
 
