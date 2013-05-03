@@ -10,6 +10,9 @@
 
 
 /* Macro section */
+/* Note: Ideally these count values should be 
+         set dynamically. But max count fixed 
+         to retain simplicity                 */
 #define MAX_IN_VAR_CNT        20
 #define MAX_OUT_VAR_CNT       20
 #define MAX_INTRNL_PROC_CNT   20

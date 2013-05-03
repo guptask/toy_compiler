@@ -1143,6 +1143,8 @@ void parse( tokenListEntry_t *psTokenList )
         return;
     }
 
+    psProgram = (program_t *) malloc(sizeof(program_t));
+
     while( psTempList )
     {
         bIsIncrNeeded = TRUE;
