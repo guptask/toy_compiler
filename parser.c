@@ -1,5 +1,6 @@
 /* Include section */
 #include "parser.h"
+#include "type_check.h"
 
 
 /* Macro section */
