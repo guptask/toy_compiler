@@ -949,31 +949,32 @@ bool_t procedure_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeede
 /* <declaration> ::=   ['global'] <procedure_declaration>  | ['global'] <variable_declaration> */
 bool_t declaration( tokenListEntry_t *psToken, bool_t bIsGlobal, bool_t *bIsTokIncrNeeded )
 {
-    switch( (sStack[uiTop-1].uiCount-1)%3 )
+    switch( (sStack[uiTop-1].uiCount)%3 )
     {
         case 0:
         {
-            if( ( (TRUE  == bIsGlobal) && (0 != strcmp(psToken->pcToken, "global")) ) ||
-                ( (FALSE == bIsGlobal) && (0 == strcmp(psToken->pcToken, "global")) )   )
+            if( 0 != strcmp(psToken->pcToken, ";") )
             {
-                if(sStack[uiTop-1].uiCount == 1)
+                return FALSE;
+            }
+        } break;
+
+        case 1:
+        {
+            if( 0 == strcmp(psToken->pcToken, "global") )
+            {
+                if(FALSE == bIsGlobal)
                 {
                     return FALSE;
                 }
-                else
-                {
-                    (void) stackPop();
-                    *bIsTokIncrNeeded = FALSE;
-                }
             }
-
-            if(FALSE == bIsGlobal)
+            else
             {
                 *bIsTokIncrNeeded = FALSE;
             }
         } break;
 
-        case 1:
+        case 2:
         {
             if( 0 == strcmp(psToken->pcToken, "procedure") )
             {
@@ -983,24 +984,12 @@ bool_t declaration( tokenListEntry_t *psToken, bool_t bIsGlobal, bool_t *bIsTokI
             {
                 eParserState = VARIABLE_DECLARATION;
             }
-            else if( (TRUE == bIsGlobal) || (2 == sStack[uiTop-1].uiCount) )
-            {
-                return FALSE;
-            }
             else
             {
                 (void) stackPop();
             }
             *bIsTokIncrNeeded = FALSE;
-        } break;
-
-        case 2:
-        {
-            if( 0 != strcmp(psToken->pcToken, ";") )
-            {
-                return FALSE;
-            }
-        } break;
+        }
     }
 
     return TRUE;
@@ -1188,6 +1177,10 @@ void parse( tokenListEntry_t *psTokenList )
                 else if( PROCEDURE_BODY == sStack[uiTop-2].eState )
                 {
                     bIsRetSucc = declaration( psTempList, FALSE, &bIsIncrNeeded );
+                }
+                else
+                {
+                    printf("Declaration rule error on line no. %u.\n", psTempList->uiLineNum);
                 }
             } break;
 
