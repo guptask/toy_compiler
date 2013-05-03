@@ -10,10 +10,13 @@
 
 
 /* Macro section */
-#define MAX_IN_VAR_COUNT      10
-#define MAX_OUT_VAR_COUNT     10
-#define MAX_GLOBAL_VAR_COUNT  20
-#define MAX_GLOBAL_PROC_COUNT 20
+#define MAX_IN_VAR_CNT        20
+#define MAX_OUT_VAR_CNT       20
+#define MAX_INTRNL_PROC_CNT   20
+#define MAX_GLOBAL_VAR_CNT    20
+#define MAX_GLOBAL_PROC_CNT   20
+#define MAX_LOCAL_VAR_CNT     20
+#define MAX_LOCAL_PROC_CNT    20
 
 
 /* Enumeration section */
@@ -33,35 +36,41 @@ typedef enum dataType_e
 /* Variable */
 typedef struct variable_s
 {
-    char            *pcVarName;
-    unsigned int    uiVarNameLen;
-    dataType_t      eDataType;
-    bool_t          bIsArray;
-    unsigned int    uiArrSize;
+    char                *pcVarName;
+    unsigned int        uiVarNameLen;
+    dataType_t          eDataType;
+    bool_t              bIsArray;
+    unsigned int        uiArrSize;
 
 } variable_t;
 
 /* Procedure */
 typedef struct procedure_s
 {
-    char            *pcProcName;
-    unsigned int    uiProcNameLen;
-    unsigned int    uiInParamNum;
-    variable_t      *arrpsInParam[MAX_IN_VAR_COUNT];
-    unsigned int    uiOutParamNum;
-    variable_t      *arrpsOutParam[MAX_OUT_VAR_COUNT];
+    char                *pcProcName;
+    unsigned int        uiProcNameLen;
+    unsigned int        uiInParamCnt;
+    variable_t          *arrpsInParam[MAX_IN_VAR_CNT];
+    unsigned int        uiOutParamCnt;
+    variable_t          *arrpsOutParam[MAX_OUT_VAR_CNT];
+    unsigned int        uiIntrnlProcCnt;
+    struct procedure_s  *arrpsIntrnlProc[MAX_INTRNL_PROC_CNT];
 
 } procedure_t;
 
-/* Global Constructs */
-typedef struct globalConstruct_s
+/* Program */
+typedef struct program_s
 {
-    unsigned int    uiVarNum;
-    variable_t      *arrpsVar[MAX_GLOBAL_VAR_COUNT];
-    unsigned int    uiProcNum;
-    procedure_t     *arrpsProc[MAX_GLOBAL_PROC_COUNT];
+    unsigned int        uiGlobalVarCnt;
+    variable_t          *arrpsGlobalVar[MAX_GLOBAL_VAR_CNT];
+    unsigned int        uiGlobalProcCnt;
+    procedure_t         *arrpsGlobalProc[MAX_GLOBAL_PROC_CNT];
+    unsigned int        uiLocalVarCnt;
+    procedure_t         *arrpsLocalVar[MAX_LOCAL_VAR_CNT];
+    unsigned int        uiLocalProcCnt;
+    procedure_t         *arrpsLocalProc[MAX_LOCAL_PROC_CNT];
 
-} globalConstruct_t;
+} program_t;
 
 
 
