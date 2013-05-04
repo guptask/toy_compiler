@@ -40,7 +40,6 @@ typedef enum dataType_e
 typedef struct variable_s
 {
     char                *pcVarName;
-    unsigned int        uiVarNameLen;
     dataType_t          eDataType;
     bool_t              bIsArray;
     unsigned int        uiArrSize;
@@ -51,12 +50,11 @@ typedef struct variable_s
 typedef struct procedure_s
 {
     char                *pcProcName;
-    unsigned int        uiProcNameLen;
-    unsigned int        uiInParamCnt;
+    unsigned char       ucInParamCnt;
     variable_t          *arrpsInParam[MAX_IN_VAR_CNT];
-    unsigned int        uiOutParamCnt;
+    unsigned char       ucOutParamCnt;
     variable_t          *arrpsOutParam[MAX_OUT_VAR_CNT];
-    unsigned int        uiIntrnlProcCnt;
+    unsigned char       ucIntrnlProcCnt;
     struct procedure_s  *arrpsIntrnlProc[MAX_INTRNL_PROC_CNT];
 
 } procedure_t;
@@ -64,13 +62,14 @@ typedef struct procedure_s
 /* Program */
 typedef struct program_s
 {
-    unsigned int        uiGlobalVarCnt;
+    char                *pcProgName;
+    unsigned char       ucGlobalVarCnt;
     variable_t          *arrpsGlobalVar[MAX_GLOBAL_VAR_CNT];
-    unsigned int        uiGlobalProcCnt;
+    unsigned char       ucGlobalProcCnt;
     procedure_t         *arrpsGlobalProc[MAX_GLOBAL_PROC_CNT];
-    unsigned int        uiLocalVarCnt;
+    unsigned char       ucLocalVarCnt;
     procedure_t         *arrpsLocalVar[MAX_LOCAL_VAR_CNT];
-    unsigned int        uiLocalProcCnt;
+    unsigned char       ucLocalProcCnt;
     procedure_t         *arrpsLocalProc[MAX_LOCAL_PROC_CNT];
 
 } program_t;
