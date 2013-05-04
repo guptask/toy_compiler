@@ -75,11 +75,19 @@ typedef struct program_s
 } program_t;
 
 
-/* Extern declaration section */
-extern program_t *psProgram;
+/* Extern variable declaration section */
+extern program_t    *psProgram;
+extern unsigned int uiNestingLevel;
+extern bool_t       bIsCurrDeclGlobal;
 
 
+/** Declaration section **/
 
+/* Type check init */
+void typeChkInit();
+
+/* Type Check Name */
+bool_t typeChkName(char *pcName, bool_t bIsProc);
 
 
 

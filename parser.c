@@ -54,8 +54,9 @@ stackState_t sStack[STACK_SIZE];
 unsigned int uiTop = 0;
 
 /* Type checking variables */
-program_t    *psProgram     = NULL;
-unsigned int uiNestingLevel = 0;
+program_t    *psProgram        = NULL;
+unsigned int uiNestingLevel    = 0;
+bool_t       bIsCurrDeclGlobal = FALSE;
 
 
 /* Definition section */
@@ -811,6 +812,7 @@ bool_t procedure_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'program' reserved word missing on line no. %u.\n'", psToken->uiLineNum);
                 return FALSE;
             }
+            uiNestingLevel--;
         } break;
 
         default:
@@ -886,10 +888,17 @@ bool_t procedure_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
-            eParserState = IDENTIFIERS;
+            uiNestingLevel++;
         } break;
 
         case 2:
+        {
+            eParserState = IDENTIFIERS;
+            *bIsTokIncrNeeded = FALSE;
+            (void) typeChkName(psToken->pcToken, TRUE);
+        } break;
+
+        case 3:
         {
             if( 0 != strcmp(psToken->pcToken, "(") )
             {
@@ -897,7 +906,7 @@ bool_t procedure_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
         } break;
 
-        case 3:
+        case 4:
         {
             if( TRUE == type_mark(psToken) )
             {
@@ -906,7 +915,7 @@ bool_t procedure_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             *bIsTokIncrNeeded = FALSE;
         } break;
 
-        case 4:
+        case 5:
         {
             if( 0 != strcmp(psToken->pcToken, ")") )
             {
@@ -972,10 +981,12 @@ bool_t declaration( tokenListEntry_t *psToken, bool_t bIsGlobal, bool_t *bIsTokI
                 {
                     return FALSE;
                 }
+                bIsCurrDeclGlobal = TRUE;
             }
             else
             {
                 *bIsTokIncrNeeded = FALSE;
+                bIsCurrDeclGlobal = FALSE;
             }
         } break;
 
@@ -1050,6 +1061,7 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'program' reserved word missing on line no. %u.\n'", psToken->uiLineNum);
                 return FALSE;
             }
+            uiNestingLevel--;
         } break;
 
         default:
@@ -1074,12 +1086,14 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'program' reserved word missing on line no. %u.\n", psToken->uiLineNum);
                 return FALSE;
             }
+            uiNestingLevel++;
         } break;
 
         case 2:
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
+            (void) typeChkName(psToken->pcToken, FALSE);
         } break;
 
         case 3:
@@ -1143,7 +1157,13 @@ void parse( tokenListEntry_t *psTokenList )
         return;
     }
 
-    psProgram = (program_t *) malloc(sizeof(program_t));
+    /* Initialize the type check structure */
+    typeChkInit();
+    if(!psProgram)
+    {
+        printf("Type check initialization failed.\n");
+        return;
+    }
 
     while( psTempList )
     {
