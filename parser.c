@@ -47,16 +47,20 @@ typedef struct stackState_s
 
 
 /** Global variable(s) **/
-parserState_t eParserState = PROGRAM;
-
-/* State stack variables */
-stackState_t sStack[STACK_SIZE];
-unsigned int uiTop = 0;
 
 /* Type checking variables */
 program_t    *psProgram        = NULL;
 unsigned int uiNestingLevel    = 0;
 bool_t       bIsCurrDeclGlobal = FALSE;
+bool_t       bIsCurrProc       = FALSE;
+
+
+/** Static variable(s) **/
+
+/* State stack variables */
+static parserState_t eParserState = PROGRAM;
+static stackState_t sStack[STACK_SIZE];
+static unsigned int uiTop = 0;
 
 
 /* Definition section */
@@ -1005,10 +1009,12 @@ bool_t declaration( tokenListEntry_t *psToken, bool_t bIsGlobal, bool_t *bIsTokI
         {
             if( 0 == strcmp(psToken->pcToken, "procedure") )
             {
+                bIsCurrProc = TRUE;
                 eParserState = PROCEDURE_DECLARATION;
             }
             else if( TRUE == type_mark(psToken) )
             {
+                bIsCurrProc = FALSE;
                 eParserState = VARIABLE_DECLARATION;
             }
             else

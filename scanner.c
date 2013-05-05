@@ -9,8 +9,8 @@
 #define MAX_LINE_LEN     1000
 #define INVALID_LINE_NUM 0
 
-/* Global section */
-char arrcResWord[RES_WORD_NUM][RES_WORD_LEN] = 
+/* Static section */
+static char arrcResWord[RES_WORD_NUM][RES_WORD_LEN] = 
                  { "string"   , "int"  , "bool"  , "float"  ,
                    "global"   , "in"   , "out"   , "if"     ,
                    "then"     , "else" , "case"  , "for"    ,
@@ -19,7 +19,7 @@ char arrcResWord[RES_WORD_NUM][RES_WORD_LEN] =
                    "is"
                  };
 
-char arrcOperator[OPERATOR_NUM][OPERATOR_LEN] = 
+static char arrcOperator[OPERATOR_NUM][OPERATOR_LEN] = 
                  {
                    ":"  , ";"  , ","  , "+"  , "-" ,
                    "*"  , "/"  , "("  , ")"  , "=" ,

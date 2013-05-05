@@ -78,6 +78,7 @@ typedef struct program_s
 extern program_t    *psProgram;
 extern unsigned int uiNestingLevel;
 extern bool_t       bIsCurrDeclGlobal;
+extern bool_t       bIsCurrProc;
 
 
 /** Declaration section **/
