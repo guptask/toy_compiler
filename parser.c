@@ -734,23 +734,33 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             {
                 return FALSE;
             }
-            eParserState = IDENTIFIERS;
+            (void) fillVarType(psToken->pcToken);
         } break;
 
         case 2:
+        {
+            eParserState = IDENTIFIERS;
+            *bIsTokIncrNeeded = FALSE;
+            (void) fillVarName(psToken->pcToken);
+        } break;
+
+        case 3:
         {
             if( 0 != strcmp(psToken->pcToken, "[") )
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
             }
-            else
-            {
-                eParserState = NUMBERS;
-            }
         } break;
 
-        case 3:
+        case 4:
+        {
+            eParserState = NUMBERS;
+            *bIsTokIncrNeeded = FALSE;
+            (void) fillArrSize(psToken->pcToken);
+        } break;
+
+        case 5:
         {
             if( 0 != strcmp(psToken->pcToken, "]") )
             {
@@ -843,6 +853,7 @@ bool_t parameter( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
+            (void) fillParamType(psToken->pcToken);
             (void) stackPop();
         } break;
 
@@ -895,7 +906,7 @@ bool_t procedure_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) typeChkName(psToken->pcToken, TRUE);
+            (void) fillProcName(psToken->pcToken);
         } break;
 
         case 3:
@@ -1093,7 +1104,7 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) typeChkName(psToken->pcToken, FALSE);
+            (void) fillProgName(psToken->pcToken);
         } break;
 
         case 3:

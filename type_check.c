@@ -8,49 +8,40 @@ void typeChkInit()
         psProgram->ucLocalVarCnt = psProgram->ucLocalProcCnt = 0;
 }
 
-/* Type checking procedure or program name */
-bool_t typeChkName(char *pcName, bool_t bIsProc)
+/* Fill variable type */
+bool_t fillVarType(char *pcType)
 {
-    switch(uiNestingLevel)
-    {
-        case 0:
-        {
-            printf("Type check nesting counter error.\n");
-            return FALSE;
-        } break;
-
-        case 1:
-        {
-            psProgram->pcProgName = pcName;
-        } break;
-
-        default:
-        {
-            if(TRUE == bIsProc)
-            {
-                if(2 == uiNestingLevel)
-                {
-                    if(TRUE == bIsProc)
-                    {
-                        procedure_t *psProcTemp = (procedure_t *) malloc(sizeof(procedure_t));
-                        psProcTemp->pcProcName = pcName;
-                        psProcTemp->ucInParamCnt = psProcTemp->ucOutParamCnt = 
-                                                       psProcTemp->ucIntrnlProcCnt = 0;
-                    }
-                    else
-                    {
-                        variable_t *psVarTemp = (variable_t *) malloc(sizeof(variable_t));
-                        psVarTemp->pcVarName = pcName;
-                    }
-                }
-                else
-                {
-                    printf("Type check for global procedure error.\n");
-                    return FALSE;
-                }
-            }
-        }
-    }
     return TRUE;
 }
+
+/* Fill variable name */
+bool_t fillVarName(char *pcName)
+{
+    return TRUE;
+}
+
+/* Fill arr size */
+bool_t fillArrSize(char *pcSize)
+{
+    return TRUE;
+}
+
+/* Fill variable in or out */
+bool_t fillParamType(char *pcParamType)
+{
+    return TRUE;
+}
+
+/* Fill procedure name */
+bool_t fillProcName(char *pcName)
+{
+    return TRUE;
+}
+
+/* Fill program name */
+bool_t fillProgName(char *pcName)
+{
+    return TRUE;
+}
+
 

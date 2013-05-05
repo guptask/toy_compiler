@@ -13,8 +13,7 @@
 /* Note: Ideally these count values should be 
          set dynamically. But max count fixed 
          to retain simplicity                 */
-#define MAX_IN_VAR_CNT        20
-#define MAX_OUT_VAR_CNT       20
+#define MAX_PROC_PARAM_CNT    40
 #define MAX_INTRNL_PROC_CNT   20
 #define MAX_GLOBAL_VAR_CNT    20
 #define MAX_GLOBAL_PROC_CNT   20
@@ -43,6 +42,8 @@ typedef struct variable_s
     dataType_t          eDataType;
     bool_t              bIsArray;
     unsigned int        uiArrSize;
+    bool_t              bIsParam;
+    bool_t              bIsOutParam;
 
 } variable_t;
 
@@ -50,10 +51,8 @@ typedef struct variable_s
 typedef struct procedure_s
 {
     char                *pcProcName;
-    unsigned char       ucInParamCnt;
-    variable_t          *arrpsInParam[MAX_IN_VAR_CNT];
-    unsigned char       ucOutParamCnt;
-    variable_t          *arrpsOutParam[MAX_OUT_VAR_CNT];
+    unsigned char       ucParamCnt;
+    variable_t          *arrpsParam[MAX_PROC_PARAM_CNT];
     unsigned char       ucIntrnlProcCnt;
     struct procedure_s  *arrpsIntrnlProc[MAX_INTRNL_PROC_CNT];
 
@@ -86,11 +85,23 @@ extern bool_t       bIsCurrDeclGlobal;
 /* Type check init */
 void typeChkInit();
 
-/* Type Check Name */
-bool_t typeChkName(char *pcName, bool_t bIsProc);
+/* Fill variable type */
+bool_t fillVarType(char *pcType);
 
+/* Fill variable name */
+bool_t fillVarName(char *pcName);
 
+/* Fill arr size */
+bool_t fillArrSize(char *pcSize);
 
+/* Fill variable in or out */
+bool_t fillParamType(char *pcParamType);
+
+/* Fill procedure name */
+bool_t fillProcName(char *pcName);
+
+/* Fill program name */
+bool_t fillProgName(char *pcName);
 
 
 
