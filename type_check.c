@@ -1,6 +1,7 @@
 /* Include section */
 #include "type_check.h"
 
+/* API: Type check init */
 bool_t initTypeChecking()
 {
     if( NULL == (psProgram = (program_t *) malloc(sizeof(program_t))) )
@@ -14,37 +15,37 @@ bool_t initTypeChecking()
     return TRUE;
 }
 
-/* Fill variable type */
+/* API: Fill variable type */
 bool_t fillVarType(char *pcType)
 {
     return TRUE;
 }
 
-/* Fill variable name */
+/* API: Fill variable name */
 bool_t fillVarName(char *pcName)
 {
     return TRUE;
 }
 
-/* Fill arr size */
+/* API: Fill arr size */
 bool_t fillArrSize(char *pcSize)
 {
     return TRUE;
 }
 
-/* Fill variable in or out */
+/* API: Fill variable in or out */
 bool_t fillParamType(char *pcParamType)
 {
     return TRUE;
 }
 
-/* Fill procedure name */
+/* API: Fill procedure name */
 bool_t fillProcName(char *pcName)
 {
     return TRUE;
 }
 
-/* Fill program name */
+/* API: Fill program name */
 bool_t fillProgName(char *pcName)
 {
     return TRUE;
