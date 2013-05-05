@@ -1,6 +1,10 @@
 /* Include section */
 #include "type_check.h"
 
+/* Static variable */
+bool_t bIsGlobalChain = FALSE;
+
+
 /* API: Type check init */
 bool_t initTypeChecking()
 {
@@ -42,12 +46,64 @@ bool_t fillParamType(char *pcParamType)
 /* API: Fill procedure name */
 bool_t fillProcName(char *pcName)
 {
+    procedure_t *psTemp = NULL, *psNode = NULL;
+
+    if(uiNestingLevel < 2)
+    {
+        printf("Incorrect nesting scenario. Needs to be tested.\n");
+        return FALSE;
+    }
+    else
+    {
+        psTemp = (procedure_t *) malloc( sizeof(procedure_t) );
+        if(!psTemp)
+        {
+            printf("Failed to allocate space for procedure name.\n");
+            return FALSE;
+        }
+        psTemp->pcProcName = pcName;
+        psTemp->ucParamCnt = 0;
+        psTemp->ucIntrnlProcCnt = 0;
+
+        if(uiNestingLevel == 2)
+        {
+            if(TRUE == bIsCurrDeclGlobal)
+            {
+                psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt++] = psTemp;
+                bIsGlobalChain = TRUE;
+            }
+            else
+            {
+                psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt++] = psTemp;
+                bIsGlobalChain = FALSE;
+            }
+        }
+        else
+        {
+            if(TRUE == bIsGlobalChain)
+            {
+                psNode = psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt-1];
+            }
+            else
+            {
+                psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
+            }
+
+            unsigned int uiTempCount = uiNestingLevel-3;
+            while(uiTempCount-- > 0)
+            {
+                psNode = psNode->arrpsIntrnlProc[psTemp->ucIntrnlProcCnt-1];
+            }
+            psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt++] = psTemp;
+        }
+    }
     return TRUE;
 }
 
 /* API: Fill program name */
 bool_t fillProgName(char *pcName)
 {
+    psProgram->pcProgName = pcName;
     return TRUE;
 }
 

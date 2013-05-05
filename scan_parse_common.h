@@ -13,7 +13,7 @@
 /* Macro section */
 #define TOKEN_TABLE_SIZE 0xFF
 #define MAX_TOKEN_LEN    0xFF
-#define DEBUG_FLAG       1
+#define DEBUG_FLAG       0
 
 /* Enumeration section */
 typedef enum bool_e
