@@ -11,7 +11,7 @@
 /* Declaration section */
 
 /* Parse the code */
-void parse( tokenListEntry_t *psTokenList );
+bool_t parse( tokenListEntry_t *psTokenList );
 
 
 

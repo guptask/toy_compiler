@@ -1,11 +1,17 @@
 /* Include section */
 #include "type_check.h"
 
-void typeChkInit()
+bool_t initTypeChecking()
 {
-    psProgram = (program_t *) malloc(sizeof(program_t));
-    psProgram->ucGlobalVarCnt = psProgram->ucGlobalProcCnt = 
-        psProgram->ucLocalVarCnt = psProgram->ucLocalProcCnt = 0;
+    if( NULL == (psProgram = (program_t *) malloc(sizeof(program_t))) )
+    {
+        printf("Failed to initialize type checking mechanism.\n");
+        return FALSE;
+    }
+    psProgram->ucGlobalVarCnt = psProgram->ucGlobalProcCnt = 0;
+    psProgram->ucLocalVarCnt  = psProgram->ucLocalProcCnt  = 0;
+
+    return TRUE;
 }
 
 /* Fill variable type */

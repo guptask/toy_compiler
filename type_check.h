@@ -83,7 +83,7 @@ extern bool_t       bIsCurrDeclGlobal;
 /** Declaration section **/
 
 /* Type check init */
-void typeChkInit();
+bool_t initTypeChecking();
 
 /* Fill variable type */
 bool_t fillVarType(char *pcType);

@@ -52,7 +52,11 @@ int main( int argc, char *argv[] )
     }
 
     /* Parse the code */
-    parse(psTokenStream);
+    if( FALSE == parse(psTokenStream) )
+    {
+        printf("Parse failure. Check error report.\n");
+        return 0;
+    }
 
     return 0;
 }

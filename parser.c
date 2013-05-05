@@ -1158,22 +1158,20 @@ bool_t program( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 }
 
 /* API: Parse the code */
-void parse( tokenListEntry_t *psTokenList )
+bool_t parse( tokenListEntry_t *psTokenList )
 {
     tokenListEntry_t *psTempList = psTokenList;
-    bool_t bIsIncrNeeded = TRUE, bIsRetSucc = TRUE;
+    bool_t bIsIncrNeeded = TRUE, bIsRetSucc = TRUE, bIsReSyncNeeded = FALSE;
     if(NULL == psTempList)
     {
         printf("No token(s) found for parser.\n");
-        return;
+        return FALSE;
     }
 
     /* Initialize the type check structure */
-    typeChkInit();
-    if(!psProgram)
+    if( FALSE == initTypeChecking() )
     {
-        printf("Type check initialization failed.\n");
-        return;
+        return FALSE;
     }
 
     while( psTempList )
@@ -1181,7 +1179,7 @@ void parse( tokenListEntry_t *psTokenList )
         bIsIncrNeeded = TRUE;
         if( TRUE != stackPush(eParserState) )
         {
-            return;
+            return FALSE;
         }
 
         switch(eParserState)
@@ -1361,14 +1359,15 @@ void parse( tokenListEntry_t *psTokenList )
                 {
                     printf("Error. Parsing ends after token '%s' on line no. %u.\n", 
                                           psTempList->pcToken, psTempList->uiLineNum);
+                    return FALSE;
                 }
-                return;
+                return TRUE;
             } break;
 
             default:
             {
                 if(DEBUG_FLAG) printf("Rule no. %d still remains unhandled.\n", eParserState);
-                return;
+                return FALSE;
             }
         }
 
@@ -1378,6 +1377,7 @@ void parse( tokenListEntry_t *psTokenList )
                             psTempList->pcToken, psTempList->uiLineNum);
 
             /* Re-sync */
+            bIsReSyncNeeded = TRUE;
             bIsIncrNeeded = TRUE;
             parseRuleReSync();
             do
@@ -1397,6 +1397,15 @@ void parse( tokenListEntry_t *psTokenList )
         ( (PROGRAM_BODY == eParserState) && (sStack[uiTop-1].uiCount != 5) ) )
     {
         printf("Program body not terminated properly.\n");
+        return FALSE;
     }
+
+    if(TRUE == bIsReSyncNeeded)
+    {
+        printf("Resyncing done. Parsing not entirely successful.\n");
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
