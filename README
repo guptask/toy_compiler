@@ -2,23 +2,19 @@
 |   README   |
 +------------+
 
-To build the code, type:   make
+To build the code, type   :  make
 
-To build the ctags, type:  ./make-ctags
+To build the ctags, type  :  ./make-ctags
 
-To execute the code, type: ./compile <code_file>
-
-Note: 'code' is a demo test file in this directory
+To execute the code, type : ./compile <code_file>
 
 
-Assumptions list :
-----------------
+Notes:
+-----
 
-1. 'global' keyword is valid only for 
-   <program_body> -> <declaration> , not for 
-   <procedure_body> -> <declaration>
+1. 'code' and 'code2' are sample files in this directory.
 
-2. A local variable name is unique inside a 
-   procedure, but can be re-used across 
-   different procedures
+2. For special cases not mentioned in guidelines, 
+   C-type rules have been followed eg. re-using of 
+   local variable names in different procedures, etc.
 
