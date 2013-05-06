@@ -40,8 +40,7 @@ typedef struct variable_s
 {
     char                *pcVarName;
     dataType_t          eDataType;
-    bool_t              bIsArray;
-    unsigned int        uiArrSize;
+    char                *pcArrSize;
     bool_t              bIsParam;
     bool_t              bIsOutParam;
 
@@ -67,7 +66,7 @@ typedef struct program_s
     unsigned char       ucGlobalProcCnt;
     procedure_t         *arrpsGlobalProc[MAX_GLOBAL_PROC_CNT];
     unsigned char       ucLocalVarCnt;
-    procedure_t         *arrpsLocalVar[MAX_LOCAL_VAR_CNT];
+    variable_t          *arrpsLocalVar[MAX_LOCAL_VAR_CNT];
     unsigned char       ucLocalProcCnt;
     procedure_t         *arrpsLocalProc[MAX_LOCAL_PROC_CNT];
 
