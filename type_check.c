@@ -96,7 +96,8 @@ bool_t fillVarName( tokenListEntry_t *psToken )
     variable_t    *psTemp     = NULL;
     procedure_t   *psNode     = NULL;
     bool_t        bRetStatus  = TRUE;
-    unsigned int  uiTempCount = 0;
+    unsigned char ucTempCount = 0;
+    unsigned int  uiNestCount = 0;
 
     if(uiNestingLevel < 1)
     {
@@ -116,13 +117,13 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 psTemp = psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt-1];
             }
 
-            for(uiTempCount = 0; psProgram->ucGlobalVarCnt > 0; uiTempCount++)
+            for(ucTempCount = 0; psProgram->ucGlobalVarCnt > 0; ucTempCount++)
             {
-                if( (TRUE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucGlobalVarCnt-1) ) break;
-                else if( (FALSE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucGlobalVarCnt) ) break;
+                if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalVarCnt-1) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalVarCnt) ) break;
                 else
                 {
-                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsGlobalVar[uiTempCount]->pcVarName) )
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsGlobalVar[ucTempCount]->pcVarName) )
                     {
                         printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
                                                                 psToken->pcToken, psToken->uiLineNum);
@@ -130,13 +131,13 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                     }
                 }
             }
-            for(uiTempCount = 0; psProgram->ucLocalVarCnt > 0; uiTempCount++)
+            for(ucTempCount = 0; psProgram->ucLocalVarCnt > 0; ucTempCount++)
             {
-                if( (TRUE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucLocalVarCnt) ) break;
-                else if( (FALSE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucLocalVarCnt-1) ) break;
+                if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalVarCnt) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalVarCnt-1) ) break;
                 else
                 {
-                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsLocalVar[uiTempCount]->pcVarName) )
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsLocalVar[ucTempCount]->pcVarName) )
                     {
                         printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
                                                                 psToken->pcToken, psToken->uiLineNum);
@@ -156,8 +157,8 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
             }
 
-            uiTempCount = uiNestingLevel-2;
-            while( psNode && (uiTempCount-- > 0) )
+            uiNestCount = uiNestingLevel-2;
+            while( psNode && (uiNestCount-- > 0) )
             {
                 psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
             }
@@ -168,9 +169,9 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 return FALSE;
             }
 
-            for(uiTempCount = 0; uiTempCount < psNode->ucParamCnt-1; uiTempCount++)
+            for(ucTempCount = 0; ucTempCount < psNode->ucParamCnt-1; ucTempCount++)
             {
-                if( 0 == strcmp(psToken->pcToken, psNode->arrpsParam[uiTempCount]->pcVarName) )
+                if( 0 == strcmp(psToken->pcToken, psNode->arrpsParam[ucTempCount]->pcVarName) )
                 {
                     printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
                                                             psToken->pcToken, psToken->uiLineNum);
@@ -327,6 +328,8 @@ bool_t fillParamType( tokenListEntry_t *psToken )
 bool_t fillProcName( tokenListEntry_t *psToken )
 {
     procedure_t *psTemp = NULL, *psNode = NULL;
+    unsigned int  uiNestCount = 0;
+    unsigned char ucTempCount = 0;
 
     if(uiNestingLevel < 2)
     {
@@ -357,6 +360,35 @@ bool_t fillProcName( tokenListEntry_t *psToken )
                 psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt++] = psTemp;
                 bIsGlobalChain = FALSE;
             }
+
+            for(ucTempCount = 0; psProgram->ucGlobalProcCnt > 0; ucTempCount++)
+            {
+                if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalProcCnt-1) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalProcCnt) ) break;
+                else
+                {
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsGlobalProc[ucTempCount]->pcProcName) )
+                    {
+                        printf("Multiple declarations of procedure '%s' in same scope on line %u.\n", 
+                                                                psToken->pcToken, psToken->uiLineNum);
+                        return FALSE;
+                    }
+                }
+            }
+            for(ucTempCount = 0; psProgram->ucLocalProcCnt > 0; ucTempCount++)
+            {
+                if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalProcCnt) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalProcCnt-1) ) break;
+                else
+                {
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsLocalProc[ucTempCount]->pcProcName) )
+                    {
+                        printf("Multiple declarations of procedure '%s' in same scope on line %u.\n", 
+                                                                psToken->pcToken, psToken->uiLineNum);
+                        return FALSE;
+                    }
+                }
+            }
         }
         else
         {
@@ -369,12 +401,22 @@ bool_t fillProcName( tokenListEntry_t *psToken )
                 psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
             }
 
-            unsigned int uiTempCount = uiNestingLevel-3;
-            while(uiTempCount-- > 0)
+            uiNestCount = uiNestingLevel-3;
+            while(uiNestCount-- > 0)
             {
                 psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
             }
             psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt++] = psTemp;
+
+            for(ucTempCount = 0; ucTempCount < psNode->ucIntrnlProcCnt-1; ucTempCount++)
+            {
+                if( 0 == strcmp(psToken->pcToken, psNode->arrpsIntrnlProc[ucTempCount]->pcProcName) )
+                {
+                    printf("Multiple declarations of procedure '%s' in same scope on line %u.\n", 
+                                                            psToken->pcToken, psToken->uiLineNum);
+                    return FALSE;
+                }
+            }
         }
     }
     return TRUE;
