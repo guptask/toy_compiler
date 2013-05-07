@@ -86,22 +86,22 @@ extern bool_t       bIsCurrProc;
 bool_t initTypeChecking();
 
 /* Fill variable type */
-bool_t fillVarType(char *pcType);
+bool_t fillVarType( tokenListEntry_t *psNode );
 
 /* Fill variable name */
-bool_t fillVarName(char *pcName);
+bool_t fillVarName( tokenListEntry_t *psNode );
 
 /* Fill arr size */
-bool_t fillArrSize(char *pcSize);
+bool_t fillArrSize( tokenListEntry_t *psNode );
 
 /* Fill variable in or out */
-bool_t fillParamType(char *pcParamType);
+bool_t fillParamType( tokenListEntry_t *psNode );
 
 /* Fill procedure name */
-bool_t fillProcName(char *pcName);
+bool_t fillProcName( tokenListEntry_t *psNode );
 
 /* Fill program name */
-bool_t fillProgName(char *pcName);
+bool_t fillProgName( tokenListEntry_t *psNode );
 
 
 

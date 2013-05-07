@@ -20,7 +20,7 @@ bool_t initTypeChecking()
 }
 
 /* API: Fill variable type */
-bool_t fillVarType(char *pcType)
+bool_t fillVarType( tokenListEntry_t *psToken )
 {
     variable_t  *psTemp = NULL;
     procedure_t *psNode = NULL;
@@ -40,11 +40,11 @@ bool_t fillVarType(char *pcType)
         }
         psTemp->pcVarName   = NULL;
 
-        if      ( 0 == strcmp(pcType, "integer") ) psTemp->eDataType = INTEGER_TYPE;
-        else if ( 0 == strcmp(pcType,   "float") ) psTemp->eDataType = FLOAT_TYPE;
-        else if ( 0 == strcmp(pcType,    "bool") ) psTemp->eDataType = BOOL_TYPE;
-        else if ( 0 == strcmp(pcType,  "string") ) psTemp->eDataType = STRING_TYPE;
-        else                                       psTemp->eDataType = UNDEFINED_TYPE;
+        if      ( 0 == strcmp(psToken->pcToken, "integer") ) psTemp->eDataType = INTEGER_TYPE;
+        else if ( 0 == strcmp(psToken->pcToken,   "float") ) psTemp->eDataType = FLOAT_TYPE;
+        else if ( 0 == strcmp(psToken->pcToken,    "bool") ) psTemp->eDataType = BOOL_TYPE;
+        else if ( 0 == strcmp(psToken->pcToken,  "string") ) psTemp->eDataType = STRING_TYPE;
+        else                                                psTemp->eDataType = UNDEFINED_TYPE;
 
         psTemp->pcArrSize   = NULL;
         psTemp->bIsParam    = FALSE;
@@ -91,10 +91,12 @@ bool_t fillVarType(char *pcType)
 }
 
 /* API: Fill variable name */
-bool_t fillVarName(char *pcName)
+bool_t fillVarName( tokenListEntry_t *psToken )
 {
-    variable_t  *psTemp = NULL;
-    procedure_t *psNode = NULL;
+    variable_t    *psTemp     = NULL;
+    procedure_t   *psNode     = NULL;
+    bool_t        bRetStatus  = TRUE;
+    unsigned int  uiTempCount = 0;
 
     if(uiNestingLevel < 1)
     {
@@ -113,6 +115,35 @@ bool_t fillVarName(char *pcName)
             {
                 psTemp = psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt-1];
             }
+
+            for(uiTempCount = 0; psProgram->ucGlobalVarCnt > 0; uiTempCount++)
+            {
+                if( (TRUE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucGlobalVarCnt-1) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucGlobalVarCnt) ) break;
+                else
+                {
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsGlobalVar[uiTempCount]->pcVarName) )
+                    {
+                        printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
+                                                                psToken->pcToken, psToken->uiLineNum);
+                        bRetStatus = FALSE;
+                    }
+                }
+            }
+            for(uiTempCount = 0; psProgram->ucLocalVarCnt > 0; uiTempCount++)
+            {
+                if( (TRUE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucLocalVarCnt) ) break;
+                else if( (FALSE == bIsCurrDeclGlobal) && (uiTempCount >= psProgram->ucLocalVarCnt-1) ) break;
+                else
+                {
+                    if( 0 == strcmp(psToken->pcToken, psProgram->arrpsLocalVar[uiTempCount]->pcVarName) )
+                    {
+                        printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
+                                                                psToken->pcToken, psToken->uiLineNum);
+                        bRetStatus = FALSE;
+                    }
+                }
+            }
         }
         else
         {
@@ -125,7 +156,7 @@ bool_t fillVarName(char *pcName)
                 psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
             }
 
-            unsigned int uiTempCount = uiNestingLevel-2;
+            uiTempCount = uiNestingLevel-2;
             while( psNode && (uiTempCount-- > 0) )
             {
                 psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
@@ -136,6 +167,16 @@ bool_t fillVarName(char *pcName)
                 printf("Error in type checking for variable name.\n");
                 return FALSE;
             }
+
+            for(uiTempCount = 0; uiTempCount < psNode->ucParamCnt-1; uiTempCount++)
+            {
+                if( 0 == strcmp(psToken->pcToken, psNode->arrpsParam[uiTempCount]->pcVarName) )
+                {
+                    printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
+                                                            psToken->pcToken, psToken->uiLineNum);
+                    bRetStatus = FALSE;
+                }
+            }
             psTemp = psNode->arrpsParam[psNode->ucParamCnt-1];
         }
 
@@ -144,13 +185,13 @@ bool_t fillVarName(char *pcName)
             printf("Error2 in type checking for variable name.\n");
             return FALSE;
         }
-        psTemp->pcVarName = pcName;
+        psTemp->pcVarName = psToken->pcToken;
     }
-    return TRUE;
+    return bRetStatus;
 }
 
 /* API: Fill arr size */
-bool_t fillArrSize(char *pcSize)
+bool_t fillArrSize( tokenListEntry_t *psToken )
 {
     variable_t  *psTemp = NULL;
     procedure_t *psNode = NULL;
@@ -203,13 +244,13 @@ bool_t fillArrSize(char *pcSize)
             printf("Error2 in type checking for variable arr size.\n");
             return FALSE;
         }
-        psTemp->pcArrSize = pcSize;
+        psTemp->pcArrSize = psToken->pcToken;
     }
     return TRUE;
 }
 
 /* API: Fill variable in or out */
-bool_t fillParamType(char *pcParamType)
+bool_t fillParamType( tokenListEntry_t *psToken )
 {
     variable_t  *psTemp = NULL;
     procedure_t *psNode = NULL;
@@ -263,12 +304,12 @@ bool_t fillParamType(char *pcParamType)
             return FALSE;
         }
 
-        if( 0 == strcmp(pcParamType, "in") )
+        if( 0 == strcmp(psToken->pcToken, "in") )
         {
             psTemp->bIsParam    = TRUE;
             psTemp->bIsOutParam = FALSE;
         }
-        else if( 0 == strcmp(pcParamType, "out") )
+        else if( 0 == strcmp(psToken->pcToken, "out") )
         {
             psTemp->bIsParam    = TRUE;
             psTemp->bIsOutParam = TRUE;
@@ -283,7 +324,7 @@ bool_t fillParamType(char *pcParamType)
 }
 
 /* API: Fill procedure name */
-bool_t fillProcName(char *pcName)
+bool_t fillProcName( tokenListEntry_t *psToken )
 {
     procedure_t *psTemp = NULL, *psNode = NULL;
 
@@ -300,7 +341,7 @@ bool_t fillProcName(char *pcName)
             printf("Failed to allocate space for procedure.\n");
             return FALSE;
         }
-        psTemp->pcProcName = pcName;
+        psTemp->pcProcName = psToken->pcToken;
         psTemp->ucParamCnt = 0;
         psTemp->ucIntrnlProcCnt = 0;
 
@@ -340,9 +381,9 @@ bool_t fillProcName(char *pcName)
 }
 
 /* API: Fill program name */
-bool_t fillProgName(char *pcName)
+bool_t fillProgName( tokenListEntry_t *psToken )
 {
-    psProgram->pcProgName = pcName;
+    psProgram->pcProgName = psToken->pcToken;
     return TRUE;
 }
 

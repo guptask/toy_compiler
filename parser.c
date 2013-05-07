@@ -62,6 +62,8 @@ static parserState_t eParserState = PROGRAM;
 static stackState_t sStack[STACK_SIZE];
 static unsigned int uiTop = 0;
 
+/* Type checking variable */
+static bool_t bIsTypeCheckSucc = TRUE;
 
 /* Definition section */
 
@@ -738,14 +740,14 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             {
                 return FALSE;
             }
-            (void) fillVarType(psToken->pcToken);
+            bIsTypeCheckSucc &= fillVarType(psToken);
         } break;
 
         case 2:
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) fillVarName(psToken->pcToken);
+            bIsTypeCheckSucc &= fillVarName(psToken);
         } break;
 
         case 3:
@@ -761,7 +763,7 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
         {
             eParserState = NUMBERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) fillArrSize(psToken->pcToken);
+            bIsTypeCheckSucc &= fillArrSize(psToken);
         } break;
 
         case 5:
@@ -857,7 +859,7 @@ bool_t parameter( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
-            (void) fillParamType(psToken->pcToken);
+            bIsTypeCheckSucc &= fillParamType(psToken);
             (void) stackPop();
         } break;
 
@@ -910,7 +912,7 @@ bool_t procedure_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) fillProcName(psToken->pcToken);
+            bIsTypeCheckSucc &= fillProcName(psToken);
         } break;
 
         case 3:
@@ -1110,7 +1112,7 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
-            (void) fillProgName(psToken->pcToken);
+            bIsTypeCheckSucc &= fillProgName(psToken);
         } break;
 
         case 3:
@@ -1409,6 +1411,12 @@ bool_t parse( tokenListEntry_t *psTokenList )
     if(TRUE == bIsReSyncNeeded)
     {
         printf("Resyncing done. Parsing not entirely successful.\n");
+        return FALSE;
+    }
+
+    if(FALSE == bIsTypeCheckSucc)
+    {
+        printf("Type checking not entirely successful.\n");
         return FALSE;
     }
 
