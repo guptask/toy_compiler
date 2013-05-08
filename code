@@ -5,7 +5,6 @@ program aProgram is
 	global procedure newProc(integer a in, bool b out)
 	integer f;
 	integer test;
-	integer test;
 	begin
 		test := a;
 		return;

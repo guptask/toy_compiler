@@ -1081,15 +1081,16 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 return FALSE;
             }
             uiNestingLevel--;
+            (void) stackPop();
+            *bIsTokIncrNeeded = FALSE;
         } break;
 
         default:
         {
-            (void) stackPop();
-            *bIsTokIncrNeeded = FALSE;
+            printf("Something is wrong in program_body rule handler.\n");
+            return FALSE;
         }
     }
-
     return TRUE;
 }
 
@@ -1369,7 +1370,6 @@ bool_t parse( tokenListEntry_t *psTokenList )
                                           psTempList->pcToken, psTempList->uiLineNum);
                     return FALSE;
                 }
-                return TRUE;
             } break;
 
             default:
@@ -1401,8 +1401,7 @@ bool_t parse( tokenListEntry_t *psTokenList )
         }
     }
 
-    if( (PROGRAM_BODY != eParserState) || 
-        ( (PROGRAM_BODY == eParserState) && (sStack[uiTop-1].uiCount != 5) ) )
+    if(MAX_STATE_NUM != eParserState)
     {
         printf("Program body not terminated properly.\n");
         return FALSE;
