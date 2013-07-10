@@ -24,7 +24,7 @@ typedef enum parserState_e
     ASSIGNMENT_STATEMENT,
     IF_STATEMENT,
     LOOP_STATEMENT,
-    DEST_OR_PROC_CALL,
+    ASSIGN_OR_PROC_CALL,
     IDENTIFIERS,
     EXPRESSION,
     ARITH_OP,
@@ -49,11 +49,11 @@ typedef struct stackState_s
 /** Global variable(s) **/
 
 /* Type checking variables */
-program_t    *psProgram        = NULL;
-unsigned int uiNestingLevel    = 0;
-bool_t       bIsCurrDeclGlobal = FALSE;
-bool_t       bIsCurrProc       = FALSE;
-
+program_t        *psProgram        = NULL;
+unsigned int     uiNestingLevel    = 0;
+bool_t           bIsCurrDeclGlobal = FALSE;
+bool_t           bIsCurrProc       = FALSE;
+tokenListEntry_t *psVariable       = NULL;
 
 /** Static variable(s) **/
 
@@ -436,10 +436,10 @@ bool_t identifiers( tokenListEntry_t *psToken, bool_t bIsStkPopNeed )
     return TRUE;
 }
 
-/* <dest_or_proc_call> ::=   <procedure_call>
+/* <assign_or_proc_call> ::=   <procedure_call>
                            | <assignment_statement>
 */
-bool_t dest_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
+bool_t assign_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
     (void) stackPop();
     *bIsTokIncrNeeded = FALSE;
@@ -665,7 +665,7 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     return TRUE;
 }
 
-/* <statement> ::=   <dest_or_proc_call>
+/* <statement> ::=   <assign_or_proc_call>
                    | <if_statement>
                    | <loop_statement>
                    | 'return'
@@ -697,7 +697,7 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
             else if(0 == strcmp(psToken->pcToken, "return")) {}
             else if (TRUE == identifiers(psToken, FALSE))
             {
-                eParserState = DEST_OR_PROC_CALL;
+                eParserState = ASSIGN_OR_PROC_CALL;
             }
             else
             {
@@ -1302,10 +1302,10 @@ bool_t parse( tokenListEntry_t *psTokenList )
                 bIsRetSucc = loop_statement( psTempList );
             } break;
 
-            case DEST_OR_PROC_CALL:
+            case ASSIGN_OR_PROC_CALL:
             {
-                if(DEBUG_FLAG) printf("dest_or_proc_call: %s\n", psTempList->pcToken);
-                bIsRetSucc = dest_or_proc_call( psTempList, &bIsIncrNeeded );
+                if(DEBUG_FLAG) printf("assign_or_proc_call: %s\n", psTempList->pcToken);
+                bIsRetSucc = assign_or_proc_call( psTempList, &bIsIncrNeeded );
             } break;
 
             case IDENTIFIERS:
