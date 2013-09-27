@@ -44,7 +44,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
         else if ( 0 == strcmp(psToken->pcToken,   "float") ) psTemp->eDataType = FLOAT_TYPE;
         else if ( 0 == strcmp(psToken->pcToken,    "bool") ) psTemp->eDataType = BOOL_TYPE;
         else if ( 0 == strcmp(psToken->pcToken,  "string") ) psTemp->eDataType = STRING_TYPE;
-        else                                                psTemp->eDataType = UNDEFINED_TYPE;
+        else                                                 psTemp->eDataType = UNDEFINED_TYPE;
 
         psTemp->pcArrSize   = NULL;
         psTemp->bIsParam    = FALSE;
@@ -333,7 +333,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
 
     if(uiNestingLevel < 2)
     {
-        printf("Incorrect nesting scenario for procedure. Needs to be tested.\n");
+        printf("Incorrect nesting scenario for procedure. Needs to be tested-1.\n");
         return FALSE;
     }
     else
@@ -427,6 +427,162 @@ bool_t fillProgName( tokenListEntry_t *psToken )
 {
     psProgram->pcProgName = psToken->pcToken;
     return TRUE;
+}
+
+/* API: Authenticate variable scope */
+bool_t authVar()
+{
+    procedure_t   *psProc     = NULL;
+    bool_t        bRetStatus  = FALSE;
+    unsigned char ucTempCount = 0;
+    unsigned int  uiNestCount = 0;
+
+    if(uiNestingLevel < 1)
+    {
+        printf("Incorrect nesting scenario for variable. Needs to be tested-5.\n");
+        return FALSE;
+    }
+
+    /* Check for program local variable */
+    else if(uiNestingLevel == 1)
+    {
+        for(ucTempCount = 0; ucTempCount < psProgram->ucLocalVarCnt; ucTempCount++)
+        {
+            if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsLocalVar[ucTempCount]->pcVarName) )
+            {
+                bRetStatus = TRUE;
+                break;
+            }
+        }
+    }
+
+    /* Check for procedure local variable */
+    else
+    {
+        if(TRUE == bIsGlobalChain)
+        {
+            psProc = psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt-1];
+        }
+        else
+        {
+            psProc = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
+        }
+
+        uiNestCount = uiNestingLevel-2;
+        while( psProc && (uiNestCount-- > 0) )
+        {
+            psProc = psProc->arrpsIntrnlProc[psProc->ucIntrnlProcCnt-1];
+        }
+
+        if(!psProc)
+        {
+            printf("Error in type checking for variable authentication.\n");
+            return FALSE;
+        }
+
+        for(ucTempCount = 0; ucTempCount < psProc->ucParamCnt; ucTempCount++)
+        {
+            if( 0 == strcmp(psVariable->pcToken, psProc->arrpsParam[ucTempCount]->pcVarName) )
+            {
+                bRetStatus = TRUE;
+                break;
+            }
+        }
+    }
+
+    /* Check for global variable */
+    for(ucTempCount = 0; (FALSE == bRetStatus) && (ucTempCount < psProgram->ucGlobalVarCnt); ucTempCount++)
+    {
+        if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsGlobalVar[ucTempCount]->pcVarName) )
+        {
+            bRetStatus = TRUE;
+        }
+    }
+
+    if(FALSE == bRetStatus)
+    { 
+        printf("Undeclared variable '%s' on line %u.\n", psVariable->pcToken, psVariable->uiLineNum);
+    }
+
+    return bRetStatus;
+}
+
+/* API: Authenticate procedure scope */
+bool_t authProc()
+{
+    procedure_t   *psProc     = NULL;
+    bool_t        bRetStatus  = FALSE;
+    unsigned char ucTempCount = 0;
+    unsigned int  uiNestCount = 0;
+
+    if(uiNestingLevel < 1)
+    {
+        printf("Incorrect nesting scenario for procedure. Needs to be tested-6.\n");
+        return FALSE;
+    }
+
+    /* Check for program local procedure */
+    else if(uiNestingLevel == 1)
+    {
+        for(ucTempCount = 0; ucTempCount < psProgram->ucLocalProcCnt; ucTempCount++)
+        {
+            if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsLocalProc[ucTempCount]->pcProcName) )
+            {
+                bRetStatus = TRUE;
+                break;
+            }
+        }
+    }
+
+    /* Check for procedure local variable */
+    else
+    {
+        if(TRUE == bIsGlobalChain)
+        {
+            psProc = psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt-1];
+        }
+        else
+        {
+            psProc = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
+        }
+
+        uiNestCount = uiNestingLevel-2;
+        while( psProc && (uiNestCount-- > 0) )
+        {
+            psProc = psProc->arrpsIntrnlProc[psProc->ucIntrnlProcCnt-1];
+        }
+
+        if(!psProc)
+        {
+            printf("Error in type checking for procedure authentication.\n");
+            return FALSE;
+        }
+
+        for(ucTempCount = 0; ucTempCount < psProc->ucIntrnlProcCnt; ucTempCount++)
+        {
+            if( 0 == strcmp(psVariable->pcToken, psProc->arrpsIntrnlProc[ucTempCount]->pcProcName) )
+            {
+                bRetStatus = TRUE;
+                break;
+            }
+        }
+    }
+
+    /* Check for global variable */
+    for(ucTempCount = 0; (FALSE == bRetStatus) && (ucTempCount < psProgram->ucGlobalProcCnt); ucTempCount++)
+    {
+        if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsGlobalProc[ucTempCount]->pcProcName) )
+        {
+            bRetStatus = TRUE;
+        }
+    }
+
+    if(FALSE == bRetStatus)
+    { 
+        printf("Undeclared procedure '%s' on line %u.\n", psVariable->pcToken, psVariable->uiLineNum);
+    }
+
+    return bRetStatus;
 }
 
 

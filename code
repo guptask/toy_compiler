@@ -1,12 +1,17 @@
 program aProgram is
-	global integer test;
+	global integer testing[5];
 	global string aString;
+	integer a;
+	integer b;
+	integer c;
+	integer d;
+	integer f;
 
 	global procedure newProc(integer a in, bool b out)
-	integer f;
+	integer g;
 	integer test;
 	begin
-		test := a;
+		test := g;
 		return;
 	end procedure;
 

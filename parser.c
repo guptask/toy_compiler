@@ -422,9 +422,10 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 /* <identifier> ::= [a-zA-Z][a-zA-Z0-9_]* */
 bool_t identifiers( tokenListEntry_t *psToken, bool_t bIsStkPopNeed )
 {
+    psVariable = psToken;
     if( IDENTIFIER != getTokenTypeFromTokTab(psToken) )
     {
-        //printf("'%s' not an identifier.\n", psToken->pcToken);
+        psVariable = NULL;
         return FALSE;
     }
 
@@ -447,10 +448,18 @@ bool_t assign_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded 
     if(0 == strcmp(psToken->pcToken, "("))
     {
         eParserState = PROCEDURE_CALL;
+        if(TRUE != authProc())
+        {
+            return FALSE;
+        }
     }
     else
     {
         eParserState = ASSIGNMENT_STATEMENT;
+        if(TRUE != authVar())
+        {
+            return FALSE;
+        }
     }
 
     return TRUE;

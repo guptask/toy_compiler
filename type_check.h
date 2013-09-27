@@ -74,11 +74,11 @@ typedef struct program_s
 
 
 /* Extern variable declaration section */
-extern program_t    *psProgram;
-extern unsigned int uiNestingLevel;
-extern bool_t       bIsCurrDeclGlobal;
-extern bool_t       bIsCurrProc;
-
+extern program_t        *psProgram;
+extern unsigned int     uiNestingLevel;
+extern bool_t           bIsCurrDeclGlobal;
+extern bool_t           bIsCurrProc;
+extern tokenListEntry_t *psVariable;
 
 /** Declaration section **/
 
@@ -103,7 +103,11 @@ bool_t fillProcName( tokenListEntry_t *psNode );
 /* Fill program name */
 bool_t fillProgName( tokenListEntry_t *psNode );
 
+/* API: Authenticate variable scope */
+bool_t authVar();
 
+/* API: Authenticate procedure scope */
+bool_t authProc();
 
 
 
