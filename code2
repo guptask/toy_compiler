@@ -1,11 +1,12 @@
 program test is
-	global integer test;
+	global integer testing;
 	global string aString;
+	integer a;
 
 	global procedure newProc(integer a in, bool b out)
 	integer f[10];
 	begin
-		test[1+1] := 1;
+		testing[1+1] := 1;
 		return;
 	end procedure;
 

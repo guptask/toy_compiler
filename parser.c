@@ -448,18 +448,10 @@ bool_t assign_or_proc_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded 
     if(0 == strcmp(psToken->pcToken, "("))
     {
         eParserState = PROCEDURE_CALL;
-        if(TRUE != authProc())
-        {
-            return FALSE;
-        }
     }
     else
     {
         eParserState = ASSIGNMENT_STATEMENT;
-        if(TRUE != authVar())
-        {
-            return FALSE;
-        }
     }
 
     return TRUE;
@@ -586,6 +578,11 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
     {
         case 1:
         {
+            /* Autheticate the variable scope */
+            if(TRUE != authVar())
+            {
+                return FALSE;
+            }
             if(0 == strcmp(psToken->pcToken, "["))
             {
                 eParserState = EXPRESSION;
@@ -644,6 +641,11 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     {
         case 1:
         {
+            /* Autheticate the procedure scope */
+            if(TRUE != authProc())
+            {
+                return FALSE;
+            }
             if(0 != strcmp(psToken->pcToken, "("))
             {
                 return FALSE;
