@@ -2,11 +2,15 @@ program test is
 	global integer testing;
 	global string aString;
 	integer a;
+	integer b;
+	integer f;
+	integer d;
+	global integer c;
 
-	global procedure newProc(integer a in, bool b out)
+	global procedure newProc(integer d in, bool b out)
 	integer f[10];
 	begin
-		testing[1+1] := 1;
+		testing[1+1] := c;
 		return;
 	end procedure;
 
