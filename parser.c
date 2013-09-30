@@ -211,6 +211,10 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
+            if(TRUE != authVar())
+            {
+                return FALSE;
+            }
             if(0 != strcmp(psToken->pcToken, "["))
             {
                 (void) stackPop();
