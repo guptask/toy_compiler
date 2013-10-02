@@ -15,6 +15,14 @@ program aProgram is
 		return;
 	end procedure;
 
+	procedure newProc1(bool b out)
+	integer g;
+	begin
+		newProc(g,b);
+		newProc1(g,b);
+		return;
+	end procedure;
+
 	begin
 		aString := "Testing...";
 		testing[1] := (a * -b) + c*d + f;

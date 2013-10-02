@@ -521,7 +521,7 @@ bool_t authProc()
         return FALSE;
     }
 
-    /* Check for program local procedure */
+    /* Check for program level procedure */
     else if(uiNestingLevel == 1)
     {
         for(ucTempCount = 0; ucTempCount < psProgram->ucLocalProcCnt; ucTempCount++)
@@ -534,7 +534,7 @@ bool_t authProc()
         }
     }
 
-    /* Check for procedure local variable */
+    /* Check for internal procedures */
     else
     {
         if(TRUE == bIsGlobalChain)
@@ -565,6 +565,12 @@ bool_t authProc()
                 bRetStatus = TRUE;
                 break;
             }
+        }
+
+        /* Check for recursion */
+        if( 0 == strcmp(psVariable->pcToken, psProc->pcProcName) )
+        {
+            bRetStatus = TRUE;
         }
     }
 
