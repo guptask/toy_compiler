@@ -514,6 +514,29 @@ bool_t authVar()
     return bRetStatus;
 }
 
+/* API: Authenticate array */
+bool_t authArr( bool_t bLogTrueOrFalse )
+{
+    if(!psVariable)
+    {
+        printf("This error should not occur.\n");
+        return FALSE;
+    }
+    if( !psVariable->pcArrSize )
+    {
+        if( FALSE == bLogTrueOrFalse )
+        {
+            printf("Variable '%s' on line %u is not an array.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
+        }
+        return FALSE;
+    }
+    if( TRUE == bLogTrueOrFalse )
+    {
+        printf("Variable '%s' on line %u missing array syntax.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
+    }
+    return TRUE;
+}
+
 /* API: Authenticate procedure scope */
 bool_t authProc()
 {

@@ -119,6 +119,9 @@ bool_t fillProgName( tokenListEntry_t *psNode );
 /* Authenticate variable scope */
 bool_t authVar();
 
+/* API: Authenticate array */
+bool_t authArr( bool_t bLogTrueOrFalse );
+
 /* Authenticate procedure scope */
 bool_t authProc();
 

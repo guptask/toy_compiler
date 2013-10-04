@@ -599,10 +599,18 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             }
             if(0 == strcmp(psToken->pcToken, "["))
             {
+                if( TRUE != authArr(FALSE) )
+                {
+                    return FALSE;
+                }
                 eParserState = EXPRESSION;
             }
             else if(0 == strcmp(psToken->pcToken, ":="))
             {
+                if( TRUE == authArr(TRUE) )
+                {
+                    return FALSE;
+                }
                 *bIsTokIncrNeeded = FALSE;
             }
             else
