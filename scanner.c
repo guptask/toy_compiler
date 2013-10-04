@@ -4,7 +4,7 @@
 /* Macro section */
 #define RES_WORD_NUM     21
 #define RES_WORD_LEN     100
-#define OPERATOR_NUM     20
+#define OPERATOR_NUM     22
 #define OPERATOR_LEN     3
 #define MAX_LINE_LEN     1000
 #define INVALID_LINE_NUM 0
@@ -24,7 +24,8 @@ static char arrcOperator[OPERATOR_NUM][OPERATOR_LEN] =
                    ":"  , ";"  , ","  , "+"  , "-" ,
                    "*"  , "/"  , "("  , ")"  , "=" ,
                    "<"  , "<=" , ">"  , ">=" , "!=" ,
-                   ":=" , "{"  , "}"  , "["  , "]"
+                   ":=" , "{"  , "}"  , "["  , "]" ,
+                   "&"  , "|"
                  };
 
 /* Definition section */
