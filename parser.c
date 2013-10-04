@@ -221,11 +221,20 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
+                if( TRUE == authArr(TRUE) )
+                {
+                    return FALSE;
+                }
             }
             else
             {
+                if( TRUE != authArr(FALSE) )
+                {
+                    return FALSE;
+                }
                 eParserState = EXPRESSION;
             }
+            popuExprTreeOperand(varDataType());
         } break;
 
         case 3:

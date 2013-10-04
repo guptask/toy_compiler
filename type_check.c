@@ -537,6 +537,23 @@ bool_t authArr( bool_t bLogTrueOrFalse )
     return TRUE;
 }
 
+/* API: Variable data type */
+dataType_t varDataType()
+{
+    if(!psVariable)
+    {
+        printf("This error should not occur.\n");
+        return FALSE;
+    }
+    if( UNDEFINED_TYPE == psVariable->eDataType )
+    {
+        printf("Data type of variable '%s' on line %u is undefined.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 /* API: Authenticate procedure scope */
 bool_t authProc()
 {

@@ -122,6 +122,9 @@ bool_t authVar();
 /* API: Authenticate array */
 bool_t authArr( bool_t bLogTrueOrFalse );
 
+/* Variable data type */
+dataType_t varDataType();
+
 /* Authenticate procedure scope */
 bool_t authProc();
 

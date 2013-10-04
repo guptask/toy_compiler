@@ -9,10 +9,10 @@ program aProgram is
     bool g;
 
     global procedure newProc(integer a in, bool b out)
-    integer g;
+    integer g[3];
     integer test;
     begin
-        test := g;
+        test := g[2+1];
         return;
     end procedure;
 

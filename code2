@@ -1,5 +1,5 @@
 program test is
-    global integer testing;
+    global integer testing[3];
     global string aString;
     integer a;
     integer b;
