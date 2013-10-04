@@ -452,9 +452,10 @@ bool_t authVar()
     {
         for(ucTempCount = 0; ucTempCount < psProgram->ucLocalVarCnt; ucTempCount++)
         {
-            if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsLocalVar[ucTempCount]->pcVarName) )
+            if( 0 == strcmp(psAuthToken->pcToken, psProgram->arrpsLocalVar[ucTempCount]->pcVarName) )
             {
                 bRetStatus = TRUE;
+                psVariable = psProgram->arrpsLocalVar[ucTempCount];
                 break;
             }
         }
@@ -486,9 +487,10 @@ bool_t authVar()
 
         for(ucTempCount = 0; ucTempCount < psProc->ucParamCnt; ucTempCount++)
         {
-            if( 0 == strcmp(psVariable->pcToken, psProc->arrpsParam[ucTempCount]->pcVarName) )
+            if( 0 == strcmp(psAuthToken->pcToken, psProc->arrpsParam[ucTempCount]->pcVarName) )
             {
                 bRetStatus = TRUE;
+                psVariable = psProc->arrpsParam[ucTempCount];
                 break;
             }
         }
@@ -497,15 +499,16 @@ bool_t authVar()
     /* Check for global variable */
     for(ucTempCount = 0; (FALSE == bRetStatus) && (ucTempCount < psProgram->ucGlobalVarCnt); ucTempCount++)
     {
-        if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsGlobalVar[ucTempCount]->pcVarName) )
+        if( 0 == strcmp(psAuthToken->pcToken, psProgram->arrpsGlobalVar[ucTempCount]->pcVarName) )
         {
             bRetStatus = TRUE;
+            psVariable = psProgram->arrpsGlobalVar[ucTempCount];
         }
     }
 
     if(FALSE == bRetStatus)
     { 
-        printf("Undeclared variable '%s' on line %u.\n", psVariable->pcToken, psVariable->uiLineNum);
+        printf("Undeclared variable '%s' on line %u.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
     }
 
     return bRetStatus;
@@ -530,9 +533,10 @@ bool_t authProc()
     {
         for(ucTempCount = 0; ucTempCount < psProgram->ucLocalProcCnt; ucTempCount++)
         {
-            if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsLocalProc[ucTempCount]->pcProcName) )
+            if( 0 == strcmp(psAuthToken->pcToken, psProgram->arrpsLocalProc[ucTempCount]->pcProcName) )
             {
                 bRetStatus = TRUE;
+                psProcedure = psProgram->arrpsLocalProc[ucTempCount];
                 break;
             }
         }
@@ -564,32 +568,35 @@ bool_t authProc()
 
         for(ucTempCount = 0; ucTempCount < psProc->ucIntrnlProcCnt; ucTempCount++)
         {
-            if( 0 == strcmp(psVariable->pcToken, psProc->arrpsIntrnlProc[ucTempCount]->pcProcName) )
+            if( 0 == strcmp(psAuthToken->pcToken, psProc->arrpsIntrnlProc[ucTempCount]->pcProcName) )
             {
                 bRetStatus = TRUE;
+                psProcedure = psProc->arrpsIntrnlProc[ucTempCount];
                 break;
             }
         }
 
         /* Check for recursion */
-        if( 0 == strcmp(psVariable->pcToken, psProc->pcProcName) )
+        if( (TRUE != bRetStatus) && (0 == strcmp(psAuthToken->pcToken, psProc->pcProcName)) )
         {
             bRetStatus = TRUE;
+            psProcedure = psProc;
         }
     }
 
     /* Check for global variable */
     for(ucTempCount = 0; (FALSE == bRetStatus) && (ucTempCount < psProgram->ucGlobalProcCnt); ucTempCount++)
     {
-        if( 0 == strcmp(psVariable->pcToken, psProgram->arrpsGlobalProc[ucTempCount]->pcProcName) )
+        if( 0 == strcmp(psAuthToken->pcToken, psProgram->arrpsGlobalProc[ucTempCount]->pcProcName) )
         {
             bRetStatus = TRUE;
+            psProcedure = psProgram->arrpsGlobalProc[ucTempCount];
         }
     }
 
     if(FALSE == bRetStatus)
     { 
-        printf("Undeclared procedure '%s' on line %u.\n", psVariable->pcToken, psVariable->uiLineNum);
+        printf("Undeclared procedure '%s' on line %u.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
     }
 
     return bRetStatus;
@@ -622,6 +629,18 @@ void destroyExprTree()
 {
     free(expressionTree[ucExpressionTreeCnt-1]);
     ucExpressionTreeCnt--;
+}
+
+/* API: Populate the expression tree operand */
+void popuExprTreeOperand( dataType_t operand )
+{
+
+}
+
+/* API: Populate the expression tree operator */
+void popuExprTreeOperator( char *operator )
+{
+
 }
 
 

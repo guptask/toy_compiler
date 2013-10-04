@@ -89,7 +89,9 @@ extern program_t        *psProgram;
 extern unsigned int     uiNestingLevel;
 extern bool_t           bIsCurrDeclGlobal;
 extern bool_t           bIsCurrProc;
-extern tokenListEntry_t *psVariable;
+extern tokenListEntry_t *psAuthToken;
+extern variable_t       *psVariable;
+extern procedure_t      *psProcedure;
 
 /** Declaration section **/
 
@@ -114,17 +116,23 @@ bool_t fillProcName( tokenListEntry_t *psNode );
 /* Fill program name */
 bool_t fillProgName( tokenListEntry_t *psNode );
 
-/* API: Authenticate variable scope */
+/* Authenticate variable scope */
 bool_t authVar();
 
-/* API: Authenticate procedure scope */
+/* Authenticate procedure scope */
 bool_t authProc();
 
-/* API: Create the expression tree */
+/* Create the expression tree */
 bool_t createExprTree();
 
-/* API: Destroy the expression tree */
+/* Destroy the expression tree */
 void destroyExprTree();
+
+/* Populate the expression tree operand */
+void popuExprTreeOperand( dataType_t operand );
+
+/* Populate the expression tree operator */
+void popuExprTreeOperator( char *operator );
 
 
 #endif /* TYPE_CHECK_H_ */

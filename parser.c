@@ -53,7 +53,9 @@ program_t        *psProgram        = NULL;
 unsigned int     uiNestingLevel    = 0;
 bool_t           bIsCurrDeclGlobal = FALSE;
 bool_t           bIsCurrProc       = FALSE;
-tokenListEntry_t *psVariable       = NULL;
+tokenListEntry_t *psAuthToken      = NULL;
+variable_t       *psVariable       = NULL;
+procedure_t      *psProcedure      = NULL;
 
 /** Static variable(s) **/
 
@@ -434,10 +436,10 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 /* <identifier> ::= [a-zA-Z][a-zA-Z0-9_]* */
 bool_t identifiers( tokenListEntry_t *psToken, bool_t bIsStkPopNeed )
 {
-    psVariable = psToken;
+    psAuthToken = psToken;
     if( IDENTIFIER != getTokenTypeFromTokTab(psToken) )
     {
-        psVariable = NULL;
+        psAuthToken = NULL;
         return FALSE;
     }
 
