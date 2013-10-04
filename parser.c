@@ -402,11 +402,19 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
+                destroyExprTree();
             }
         } break;
 
         case 1:
         {
+            if( 1 == sStack[uiTop-1].uiCount )
+            {
+                if( TRUE != createExprTree() )
+                {
+                    return FALSE;
+                }
+            }
             if( 0 != strcmp(psToken->pcToken, "not") )
             {
                 *bIsTokIncrNeeded = FALSE;

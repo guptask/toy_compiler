@@ -1,9 +1,13 @@
 /* Include section */
 #include "type_check.h"
 
-/* Static variable */
-bool_t bIsGlobalChain = FALSE;
+/* Macro Section */
+#define MAX_EXPR_TREE_ARR_LEN 20
 
+/* Static variable */
+static bool_t bIsGlobalChain = FALSE;
+static unsigned char ucExpressionTreeCnt = 0;
+static exprTree_t *expressionTree[MAX_EXPR_TREE_ARR_LEN];
 
 /* API: Type check init */
 bool_t initTypeChecking()
@@ -589,6 +593,35 @@ bool_t authProc()
     }
 
     return bRetStatus;
+}
+
+/* API: Create the expression tree */
+bool_t createExprTree()
+{
+    exprTree_t *eTree = NULL;
+    if( !(eTree = (exprTree_t *) malloc( sizeof(exprTree_t))) )
+    {
+        printf("Failed to create expression tree.\n");
+        return FALSE;
+    }
+    eTree->ucOperandStkTop  = 0;
+    eTree->ucOperatorStkTop = 0;
+
+    if(MAX_EXPR_TREE_ARR_LEN <= ucExpressionTreeCnt)
+    {
+        printf("Exceeded the max no. of nested expression trees supported.\n");
+        return FALSE;
+    }
+    expressionTree[ucExpressionTreeCnt++] = eTree;
+
+    return TRUE;
+}
+
+/* API: Destroy the expression tree */
+void destroyExprTree()
+{
+    free(expressionTree[ucExpressionTreeCnt-1]);
+    ucExpressionTreeCnt--;
 }
 
 

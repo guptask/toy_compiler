@@ -19,6 +19,8 @@
 #define MAX_GLOBAL_PROC_CNT   20
 #define MAX_LOCAL_VAR_CNT     20
 #define MAX_LOCAL_PROC_CNT    20
+#define MAX_EXPR_OPERATOR_CNT 30
+#define MAX_EXPR_OPERAND_CNT  60
 
 
 /* Enumeration section */
@@ -72,6 +74,15 @@ typedef struct program_s
 
 } program_t;
 
+/* Expression Tree */
+typedef struct exprTree_s
+{
+    unsigned char ucOperandStkTop;
+    dataType_t operandStk[MAX_EXPR_OPERAND_CNT];
+    unsigned char ucOperatorStkTop;
+    char *operatorStk[MAX_EXPR_OPERATOR_CNT];
+
+} exprTree_t;
 
 /* Extern variable declaration section */
 extern program_t        *psProgram;
@@ -109,6 +120,11 @@ bool_t authVar();
 /* API: Authenticate procedure scope */
 bool_t authProc();
 
+/* API: Create the expression tree */
+bool_t createExprTree();
+
+/* API: Destroy the expression tree */
+void destroyExprTree();
 
 
 #endif /* TYPE_CHECK_H_ */
