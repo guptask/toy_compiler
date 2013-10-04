@@ -265,10 +265,15 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     {
         case 1:
         {
-            if( (0 == strcmp(psToken->pcToken, "true" ))   |
-                (0 == strcmp(psToken->pcToken, "false"))   |
-                (STRING == getTokenTypeFromTokTab(psToken)) )
+            if( (0 == strcmp(psToken->pcToken, "true" )) |
+                (0 == strcmp(psToken->pcToken, "false"))  )
             {
+                popuExprTreeOperand(BOOL_TYPE);
+                (void) stackPop();
+            }
+            else if( STRING == getTokenTypeFromTokTab(psToken) )
+            {
+                popuExprTreeOperand(STRING_TYPE);
                 (void) stackPop();
             }
             else if(0 == strcmp(psToken->pcToken, "("))
@@ -283,8 +288,20 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
-            if( (0 == strcmp(psToken->pcToken, ")")) || (TRUE == numbers(psToken)) )
+            if( 0 == strcmp(psToken->pcToken, ")") )
             {
+                (void) stackPop();
+            }
+            else if( TRUE == numbers(psToken) )
+            {
+                if( !strstr(psToken->pcToken, ".") )
+                {
+                    popuExprTreeOperand(INTEGER_TYPE);
+                }
+                else
+                {
+                    popuExprTreeOperand(FLOAT_TYPE);
+                }
                 (void) stackPop();
             }
             else

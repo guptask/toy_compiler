@@ -667,14 +667,14 @@ bool_t createExprTree()
 /* API: Destroy the expression tree */
 void destroyExprTree()
 {
-    free(expressionTree[ucExpressionTreeCnt-1]);
-    ucExpressionTreeCnt--;
+    free(expressionTree[--ucExpressionTreeCnt]);
 }
 
 /* API: Populate the expression tree operand */
 void popuExprTreeOperand( dataType_t operand )
 {
-
+    exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+    eTree->operandStk[(eTree->ucOperandStkTop)++] = operand;
 }
 
 /* API: Populate the expression tree operator */
