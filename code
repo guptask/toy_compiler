@@ -12,7 +12,7 @@ program aProgram is
     integer g[3];
     integer test;
     begin
-        test := g[2+1];
+        test := g[2+1]*b;
         return;
     end procedure;
 
@@ -36,7 +36,7 @@ program aProgram is
         end if;
 
         // for statement
-        for (a := 0; a<=10)
+        for (a := 0; a<=10.1)
             a := a+1;
             testing[a] := a+1;
         end for;
