@@ -90,8 +90,6 @@ extern unsigned int     uiNestingLevel;
 extern bool_t           bIsCurrDeclGlobal;
 extern bool_t           bIsCurrProc;
 extern tokenListEntry_t *psAuthToken;
-extern variable_t       *psVariable;
-extern procedure_t      *psProcedure;
 
 /** Declaration section **/
 
@@ -122,8 +120,11 @@ bool_t authVar();
 /* API: Authenticate array */
 bool_t authArr( bool_t bLogTrueOrFalse );
 
-/* Variable data type */
-dataType_t varDataType();
+/* Authenticate data type */
+bool_t authDataType();
+
+/* Fetch data type */
+dataType_t fetchDataType();
 
 /* Authenticate procedure scope */
 bool_t authProc();

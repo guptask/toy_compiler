@@ -54,8 +54,6 @@ unsigned int     uiNestingLevel    = 0;
 bool_t           bIsCurrDeclGlobal = FALSE;
 bool_t           bIsCurrProc       = FALSE;
 tokenListEntry_t *psAuthToken      = NULL;
-variable_t       *psVariable       = NULL;
-procedure_t      *psProcedure      = NULL;
 
 /** Static variable(s) **/
 
@@ -234,7 +232,12 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 }
                 eParserState = EXPRESSION;
             }
-            popuExprTreeOperand(varDataType());
+            if( TRUE != authDataType() )
+            {
+                return FALSE;
+            }
+            popuExprTreeOperand( fetchDataType() );
+
         } break;
 
         case 3:
@@ -431,6 +434,7 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
                 destroyExprTree();
+                printf("End  : %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
             }
         } break;
 
@@ -442,6 +446,7 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+                printf("Begin: %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
             }
             if( 0 != strcmp(psToken->pcToken, "not") )
             {

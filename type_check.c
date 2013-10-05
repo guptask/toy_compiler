@@ -5,9 +5,11 @@
 #define MAX_EXPR_TREE_ARR_LEN 20
 
 /* Static variable */
-static bool_t bIsGlobalChain = FALSE;
+static bool_t        bIsGlobalChain = FALSE;
 static unsigned char ucExpressionTreeCnt = 0;
-static exprTree_t *expressionTree[MAX_EXPR_TREE_ARR_LEN];
+static exprTree_t    *expressionTree[MAX_EXPR_TREE_ARR_LEN];
+static variable_t    *psVariable  = NULL;
+static procedure_t   *psProcedure = NULL;
 
 /* API: Type check init */
 bool_t initTypeChecking()
@@ -440,6 +442,7 @@ bool_t authVar()
     bool_t        bRetStatus  = FALSE;
     unsigned char ucTempCount = 0;
     unsigned int  uiNestCount = 0;
+    psVariable                = NULL;
 
     if(uiNestingLevel < 1)
     {
@@ -519,7 +522,7 @@ bool_t authArr( bool_t bLogTrueOrFalse )
 {
     if(!psVariable)
     {
-        printf("This error should not occur.\n");
+        printf("1.This error should not occur.\n");
         return FALSE;
     }
     if( !psVariable->pcArrSize )
@@ -537,12 +540,12 @@ bool_t authArr( bool_t bLogTrueOrFalse )
     return TRUE;
 }
 
-/* API: Variable data type */
-dataType_t varDataType()
+/* API: Authenticate data type */
+bool_t authDataType()
 {
     if(!psVariable)
     {
-        printf("This error should not occur.\n");
+        printf("2.This error should not occur.\n");
         return FALSE;
     }
     if( UNDEFINED_TYPE == psVariable->eDataType )
@@ -550,8 +553,18 @@ dataType_t varDataType()
         printf("Data type of variable '%s' on line %u is undefined.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
         return FALSE;
     }
-
     return TRUE;
+}
+
+/* API: Fetch data type */
+dataType_t fetchDataType()
+{
+    if(!psVariable)
+    {
+        printf("3.This error should not occur.\n");
+        return FALSE;
+    }
+    return psVariable->eDataType;
 }
 
 /* API: Authenticate procedure scope */
@@ -561,6 +574,7 @@ bool_t authProc()
     bool_t        bRetStatus  = FALSE;
     unsigned char ucTempCount = 0;
     unsigned int  uiNestCount = 0;
+    psProcedure               = NULL;
 
     if(uiNestingLevel < 1)
     {
@@ -667,6 +681,12 @@ bool_t createExprTree()
 /* API: Destroy the expression tree */
 void destroyExprTree()
 {
+    //temp
+    exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+    unsigned char i;
+    for(i = 0; i < eTree->ucOperandStkTop; i++) printf("%d ", eTree->operandStk[i]);
+    printf("\n");
+
     free(expressionTree[--ucExpressionTreeCnt]);
 }
 
