@@ -317,7 +317,12 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 if( !strstr(psToken->pcToken, ".") )
                 {
-                    if( TRUE != popuExprTreeOperand(INTEGER_TYPE) )
+                    dataType_t eOptional = UNDEFINED_TYPE;
+                    if( (0 == strcmp(psToken->pcToken, "0")) || (0 == strcmp(psToken->pcToken, "1")) )
+                    {
+                        eOptional = FLOAT_TYPE;
+                    }
+                    if( TRUE != popuExprTreeOperand( INTEGER_TYPE + eOptional ) )
                     {
                         return FALSE;
                     }

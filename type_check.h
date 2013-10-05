@@ -28,10 +28,10 @@
 typedef enum dataType_e
 {
     UNDEFINED_TYPE = 0,
-    INTEGER_TYPE,
-    FLOAT_TYPE,
-    BOOL_TYPE,
-    STRING_TYPE
+    INTEGER_TYPE   = 1,
+    FLOAT_TYPE     = 2,
+    BOOL_TYPE      = 4,
+    STRING_TYPE    = 8
 
 } dataType_t;
 
