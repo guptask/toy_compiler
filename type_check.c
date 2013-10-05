@@ -684,23 +684,43 @@ void destroyExprTree()
     //temp
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
     unsigned char i;
-    for(i = 0; i < eTree->ucOperandStkTop; i++) printf("%d ", eTree->operandStk[i]);
+    printf("Operand stack : ");
+    for(i = 0; i < eTree->ucOperandStkTop; i++) printf("%d ", eTree->arreOperandStk[i]);
+    printf("\n");
+    printf("Operator stack: ");
+    for(i = 0; i < eTree->ucOperatorStkTop; i++) printf("'%s'(%d) ", 
+                            eTree->arrpcOperatorStk[i], eTree->arrbOperatorType[i]);
     printf("\n");
 
     free(expressionTree[--ucExpressionTreeCnt]);
 }
 
 /* API: Populate the expression tree operand */
-void popuExprTreeOperand( dataType_t operand )
+bool_t popuExprTreeOperand( dataType_t eOperand )
 {
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
-    eTree->operandStk[(eTree->ucOperandStkTop)++] = operand;
+    if( MAX_EXPR_OPERAND_CNT <= eTree->ucOperandStkTop )
+    {
+        printf("Exceeded the max no. of operands supported per expression.\n");
+        return FALSE;
+    }
+    eTree->arreOperandStk[(eTree->ucOperandStkTop)++] = eOperand;
+    return TRUE;
 }
 
 /* API: Populate the expression tree operator */
-void popuExprTreeOperator( char *operator )
+bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator )
 {
-
+    exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+    if( MAX_EXPR_OPERATOR_CNT <= eTree->ucOperatorStkTop )
+    {
+        printf("Exceeded the max no. of operators supported per expression.\n");
+        return FALSE;
+    }
+    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop] = pcOperator;
+    eTree->arrbOperatorType[eTree->ucOperatorStkTop] = bIsUnaryOperator;
+    (eTree->ucOperatorStkTop)++;
+    return TRUE;
 }
 
 

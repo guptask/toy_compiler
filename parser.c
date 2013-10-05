@@ -236,8 +236,10 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
-            popuExprTreeOperand( fetchDataType() );
-
+            if( TRUE != popuExprTreeOperand(fetchDataType()) )
+            {
+                return FALSE;
+            }
         } break;
 
         case 3:
@@ -271,12 +273,18 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             if( (0 == strcmp(psToken->pcToken, "true" )) |
                 (0 == strcmp(psToken->pcToken, "false"))  )
             {
-                popuExprTreeOperand(BOOL_TYPE);
+                if( TRUE != popuExprTreeOperand(BOOL_TYPE) )
+                {
+                    return FALSE;
+                }
                 (void) stackPop();
             }
             else if( STRING == getTokenTypeFromTokTab(psToken) )
             {
-                popuExprTreeOperand(STRING_TYPE);
+                if( TRUE != popuExprTreeOperand(STRING_TYPE) )
+                {
+                    return FALSE;
+                }
                 (void) stackPop();
             }
             else if(0 == strcmp(psToken->pcToken, "("))
@@ -285,7 +293,17 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
             else 
             {
-                if(0 != strcmp(psToken->pcToken, "-")) *bIsTokIncrNeeded = FALSE;
+                if(0 != strcmp(psToken->pcToken, "-"))
+                {
+                    *bIsTokIncrNeeded = FALSE;
+                }
+                else
+                {
+                    if( TRUE != popuExprTreeOperator(psToken->pcToken, TRUE) )
+                    {
+                        return FALSE;
+                    }
+                }
             }
         } break;
 
@@ -299,11 +317,17 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 if( !strstr(psToken->pcToken, ".") )
                 {
-                    popuExprTreeOperand(INTEGER_TYPE);
+                    if( TRUE != popuExprTreeOperand(INTEGER_TYPE) )
+                    {
+                        return FALSE;
+                    }
                 }
                 else
                 {
-                    popuExprTreeOperand(FLOAT_TYPE);
+                    if( TRUE != popuExprTreeOperand(FLOAT_TYPE) )
+                    {
+                        return FALSE;
+                    }
                 }
                 (void) stackPop();
             }
@@ -342,6 +366,13 @@ bool_t term( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
             }
+            else
+            {
+                if( TRUE != popuExprTreeOperator(psToken->pcToken, FALSE) )
+                {
+                    return FALSE;
+                }
+            }
         } break;
 
         case 1:
@@ -378,6 +409,13 @@ bool_t relation( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
             }
+            else
+            {
+                if( TRUE != popuExprTreeOperator(psToken->pcToken, FALSE) )
+                {
+                    return FALSE;
+                }
+            }
         } break;
 
         case 1:
@@ -405,6 +443,13 @@ bool_t arith_op( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
+            }
+            else
+            {
+                if( TRUE != popuExprTreeOperator(psToken->pcToken, FALSE) )
+                {
+                    return FALSE;
+                }
             }
         } break;
 
@@ -434,7 +479,16 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
                 destroyExprTree();
+
+                //temp
                 printf("End  : %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
+            }
+            else
+            {
+                if( TRUE != popuExprTreeOperator(psToken->pcToken, FALSE) )
+                {
+                    return FALSE;
+                }
             }
         } break;
 
@@ -446,11 +500,21 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+
+                //temp
                 printf("Begin: %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
             }
+
             if( 0 != strcmp(psToken->pcToken, "not") )
             {
                 *bIsTokIncrNeeded = FALSE;
+            }
+            else
+            {
+                if( TRUE != popuExprTreeOperator(psToken->pcToken, TRUE) )
+                {
+                    return FALSE;
+                }
             }
         } break;
 

@@ -78,9 +78,10 @@ typedef struct program_s
 typedef struct exprTree_s
 {
     unsigned char ucOperandStkTop;
-    dataType_t operandStk[MAX_EXPR_OPERAND_CNT];
+    dataType_t arreOperandStk[MAX_EXPR_OPERAND_CNT];
     unsigned char ucOperatorStkTop;
-    char *operatorStk[MAX_EXPR_OPERATOR_CNT];
+    char *arrpcOperatorStk[MAX_EXPR_OPERATOR_CNT];
+    bool_t arrbOperatorType[MAX_EXPR_OPERATOR_CNT];
 
 } exprTree_t;
 
@@ -136,10 +137,10 @@ bool_t createExprTree();
 void destroyExprTree();
 
 /* Populate the expression tree operand */
-void popuExprTreeOperand( dataType_t operand );
+bool_t popuExprTreeOperand( dataType_t eOperand );
 
 /* Populate the expression tree operator */
-void popuExprTreeOperator( char *operator );
+bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator );
 
 
 #endif /* TYPE_CHECK_H_ */
