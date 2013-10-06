@@ -2,19 +2,20 @@
 |   README   |
 +------------+
 
-To build the code, type   :  make
+To build the compiler, type    :  make
 
-To build the ctags, type  :  ./make-ctags
+To build the ctags links, type :  ./make-ctags
+(needed only for code browsing)
 
-To execute the code, type : ./compile <code_file>
+To test a sample code, type    : ./compile <code_sample>
 
 
 Notes:
 -----
 
-1. 'code' and 'code2' are sample files in this directory.
+1. 'code' and 'code2' are code samples in this directory.
 
-2. For special cases not mentioned in guidelines, 
-   C-type rules have been followed eg. re-using of 
-   local variable names in different procedures, etc.
+2. For special cases not mentioned in guidelines, C-type 
+   rules have been followed eg. re-using of local variable 
+   names in different procedures, etc.
 
