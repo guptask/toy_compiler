@@ -679,7 +679,7 @@ bool_t createExprTree()
 }
 
 /* API: Destroy the expression tree */
-void destroyExprTree()
+bool_t destroyExprTree()
 {
     //temp
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
@@ -692,7 +692,13 @@ void destroyExprTree()
                             eTree->arrpcOperatorStk[i], eTree->arrbOperatorType[i]);
     printf("\n");
 
+    if( !ucExpressionTreeCnt )
+    {
+        printf("No expression tree exists.\n");
+        return FALSE;
+    }
     free(expressionTree[--ucExpressionTreeCnt]);
+    return TRUE;
 }
 
 /* API: Populate the expression tree operand */
@@ -721,6 +727,12 @@ bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator )
     eTree->arrbOperatorType[eTree->ucOperatorStkTop] = bIsUnaryOperator;
     (eTree->ucOperatorStkTop)++;
     return TRUE;
+}
+
+/* API: Evaluate the expression tree */
+dataType_t evalExprTree()
+{
+    return UNDEFINED_TYPE;
 }
 
 

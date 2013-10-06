@@ -13,14 +13,15 @@
 /* Note: Ideally these count values should be 
          set dynamically. But max count fixed 
          to retain simplicity                 */
-#define MAX_PROC_PARAM_CNT    40
-#define MAX_INTRNL_PROC_CNT   20
-#define MAX_GLOBAL_VAR_CNT    20
-#define MAX_GLOBAL_PROC_CNT   20
-#define MAX_LOCAL_VAR_CNT     20
-#define MAX_LOCAL_PROC_CNT    20
-#define MAX_EXPR_OPERATOR_CNT 30
-#define MAX_EXPR_OPERAND_CNT  60
+#define MAX_PROC_PARAM_CNT    80
+#define MAX_INTRNL_PROC_CNT   80
+#define MAX_GLOBAL_VAR_CNT    80
+#define MAX_GLOBAL_PROC_CNT   80
+#define MAX_LOCAL_VAR_CNT     80
+#define MAX_LOCAL_PROC_CNT    80
+#define MAX_EXPR_OPERATOR_CNT 40
+#define MAX_EXPR_OPERAND_CNT  80
+#define EXPR_DEBUG_FLAG       1
 
 
 /* Enumeration section */
@@ -134,13 +135,16 @@ bool_t authProc();
 bool_t createExprTree();
 
 /* Destroy the expression tree */
-void destroyExprTree();
+bool_t destroyExprTree();
 
 /* Populate the expression tree operand */
 bool_t popuExprTreeOperand( dataType_t eOperand );
 
 /* Populate the expression tree operator */
 bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator );
+
+/* Evaluate the expression tree */
+dataType_t evalExprTree();
 
 
 #endif /* TYPE_CHECK_H_ */

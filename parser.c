@@ -58,12 +58,13 @@ tokenListEntry_t *psAuthToken      = NULL;
 /** Static variable(s) **/
 
 /* State stack variables */
-static parserState_t eParserState = PROGRAM;
-static stackState_t sStack[STACK_SIZE];
-static unsigned int uiTop = 0;
+static parserState_t eParserState        = PROGRAM;
+static stackState_t  sStack[STACK_SIZE];
+static unsigned int  uiTop               = 0;
 
 /* Type checking variable */
-static bool_t bIsTypeCheckSucc = TRUE;
+static bool_t     bIsTypeCheckSucc = TRUE;
+static dataType_t eExprEval        = UNDEFINED_TYPE;
 
 /* Definition section */
 
@@ -483,10 +484,17 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
-                destroyExprTree();
 
-                //temp
-                printf("End  : %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
+                eExprEval = evalExprTree();
+                if( TRUE != destroyExprTree() )
+                {
+                    return FALSE;
+                }
+
+                if(EXPR_DEBUG_FLAG)
+                {
+                    printf("End  : %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
+                }
             }
             else
             {
@@ -505,9 +513,12 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+                eExprEval = UNDEFINED_TYPE;
 
-                //temp
-                printf("Begin: %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
+                if(EXPR_DEBUG_FLAG)
+                {
+                    printf("Begin: %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
+                }
             }
 
             if( 0 != strcmp(psToken->pcToken, "not") )
