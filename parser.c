@@ -65,6 +65,7 @@ static unsigned int  uiTop               = 0;
 /* Type checking variable */
 static bool_t     bIsTypeCheckSucc = TRUE;
 static dataType_t eExprEval        = UNDEFINED_TYPE;
+static dataType_t eAssignStatement = UNDEFINED_TYPE;
 
 /* Definition section */
 
@@ -247,6 +248,11 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             if(0 != strcmp(psToken->pcToken, "]"))
             {
+                return FALSE;
+            }
+            if( ((INTEGER_TYPE+BOOL_TYPE) != eExprEval) && (INTEGER_TYPE != eExprEval) )
+            {
+                printf("Array index can only be bool (converted into integer) or integer.\n");
                 return FALSE;
             }
             (void) stackPop();
@@ -712,6 +718,8 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
     {
         case 1:
         {
+            eAssignStatement = UNDEFINED_TYPE;
+
             /* Autheticate the variable scope */
             if(TRUE != authVar())
             {
@@ -737,11 +745,25 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             {
                 return FALSE;
             }
+
+            if( TRUE != authDataType() )
+            {
+                return FALSE;
+            }
+            eAssignStatement = fetchDataType();
+
         } break;
 
         case 2:
         {
-            if(0 == strcmp(psToken->pcToken, "]")) {}
+            if(0 == strcmp(psToken->pcToken, "]"))
+            {
+                if( ((INTEGER_TYPE+BOOL_TYPE) != eExprEval) && (INTEGER_TYPE != eExprEval) )
+                {
+                    printf("Array index can only be bool(converted into integer) or integer.\n");
+                    return FALSE;
+                }
+            }
             else if(0 == strcmp(psToken->pcToken, ":="))
             {
                 *bIsTokIncrNeeded = FALSE;
@@ -766,6 +788,11 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
 
         case 4:
         {
+            if( !(eAssignStatement & eExprEval) )
+            {
+                printf("Data type mismatch for left and right sides of assignment.\n");
+                return FALSE;
+            }
             (void) stackPop();
             *bIsTokIncrNeeded = FALSE;
         } break;
