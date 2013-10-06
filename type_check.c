@@ -745,7 +745,9 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
         else /* binary operator */
         {
             if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "*")) ||
-                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "/"))   )
+                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "/")) ||
+                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "+")) ||
+                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-"))   )
             {
                 if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) &&
                     (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
@@ -755,6 +757,7 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
                     return FALSE;
                 }
                 (eTree->ucOperandStkTop)--;
+                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = INTEGER_TYPE;
                 (eTree->ucOperatorStkTop)--;
             }
             else
@@ -785,7 +788,32 @@ bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator )
 /* API: Evaluate the expression tree */
 dataType_t evalExprTree()
 {
-    return UNDEFINED_TYPE;
+    dataType_t eRetStatus = UNDEFINED_TYPE;
+    exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+
+    /* If no computation is required */
+    if( !eTree->ucOperatorStkTop )
+    {
+        if( 1 == eTree->ucOperandStkTop )
+        {
+            eTree->ucOperandStkTop = 0;
+            eRetStatus = eTree->arreOperandStk[0];
+        }
+        else
+        {
+            printf("4.This error should not occur.\n");
+        }
+    }
+    else /* computation is required */
+    {
+        eRetStatus = INTEGER_TYPE;
+    }
+
+    if( UNDEFINED_TYPE == eRetStatus )
+    {
+        printf("Error: Could not evaluate the expression.\n");
+    }
+    return eRetStatus;
 }
 
 

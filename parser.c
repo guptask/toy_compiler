@@ -313,22 +313,27 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             if( 0 == strcmp(psToken->pcToken, ")") )
             {
                 (void) stackPop();
+                if( TRUE != popuExprTreeOperand(eExprEval) )
+                {
+                    return FALSE;
+                }
             }
             else if( TRUE == numbers(psToken) )
             {
+                /* Check if number is integer or float */
                 if( !strstr(psToken->pcToken, ".") )
                 {
                     dataType_t eOptional = UNDEFINED_TYPE;
                     if( (0 == strcmp(psToken->pcToken, "0")) || (0 == strcmp(psToken->pcToken, "1")) )
                     {
-                        eOptional = FLOAT_TYPE;
+                        eOptional = BOOL_TYPE;
                     }
                     if( TRUE != popuExprTreeOperand( INTEGER_TYPE + eOptional ) )
                     {
                         return FALSE;
                     }
                 }
-                else
+                else /* When number is float */
                 {
                     if( TRUE != popuExprTreeOperand(FLOAT_TYPE) )
                     {
@@ -485,7 +490,10 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
 
-                eExprEval = evalExprTree();
+                if( UNDEFINED_TYPE == (eExprEval = evalExprTree()) )
+                {
+                    return FALSE;
+                }
                 if( TRUE != destroyExprTree() )
                 {
                     return FALSE;
