@@ -711,6 +711,59 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
         return FALSE;
     }
     eTree->arreOperandStk[(eTree->ucOperandStkTop)++] = eOperand;
+
+    /* Start evaluation */
+    while(eTree->ucOperatorStkTop)
+    {
+        /* Check for unary operator */
+        if( TRUE == eTree->arrbOperatorType[eTree->ucOperatorStkTop-1] )
+        {
+            if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-") )
+            {
+                if( !(eOperand & (INTEGER_TYPE+FLOAT_TYPE)) )
+                {
+                    printf( "Error: Unary operator '-' supports integer or float only.\n");
+                    return FALSE;
+                }
+            }
+            else if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "not") )
+            {
+                if( !(eOperand & (INTEGER_TYPE+BOOL_TYPE)) )
+                {
+                    printf( "Error: Unary operator 'not' supports integer or boolean only.\n");
+                    return FALSE;
+                }
+            }
+            else
+            {
+                printf( "Error: Invalid unary operator '%s'.\n", 
+                        eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
+                return FALSE;
+            }
+            (eTree->ucOperatorStkTop)--;
+        }
+        else /* binary operator */
+        {
+            if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "*")) ||
+                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "/"))   )
+            {
+                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) &&
+                    (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
+                {
+                    printf( "Error: Binary operator '%s' supports integer or float only.\n",
+                                        eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
+                    return FALSE;
+                }
+                (eTree->ucOperandStkTop)--;
+                (eTree->ucOperatorStkTop)--;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
     return TRUE;
 }
 

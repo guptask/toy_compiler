@@ -8,7 +8,7 @@ program aProgram is
     integer f;
     bool g;
 
-    global procedure newProc(integer a in, bool b out)
+    global procedure newProc(integer a in, integer b out)
     integer g[3];
     integer test;
     begin
