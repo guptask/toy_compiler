@@ -33,7 +33,7 @@ int main( int argc, char *argv[] )
     /* If code scan fails */
     if( !(psTokenStream = scan(fpCode)) )
     {
-        printf("Scan failure. Check error report.\n");
+        printf("Scan failure. Check errors reported.\n");
         return 0;
     }
 
@@ -54,7 +54,7 @@ int main( int argc, char *argv[] )
     /* Parse the code */
     if( FALSE == parse(psTokenStream) )
     {
-        printf("Parse or type check failure. Check error report.\n");
+        printf("Parse or type check failure. Check errors reported.\n");
         return 0;
     }
 

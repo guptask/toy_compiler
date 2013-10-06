@@ -501,6 +501,7 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
                 if(EXPR_DEBUG_FLAG)
                 {
+                    printf("Result: %d\n", eExprEval);
                     printf("End  : %s (%u)\n", psToken->pcToken, psToken->uiLineNum);
                 }
             }

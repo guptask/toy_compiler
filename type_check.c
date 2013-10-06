@@ -681,17 +681,6 @@ bool_t createExprTree()
 /* API: Destroy the expression tree */
 bool_t destroyExprTree()
 {
-    //temp
-    exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
-    unsigned char i;
-    printf("Operand stack : ");
-    for(i = 0; i < eTree->ucOperandStkTop; i++) printf("%d ", eTree->arreOperandStk[i]);
-    printf("\n");
-    printf("Operator stack: ");
-    for(i = 0; i < eTree->ucOperatorStkTop; i++) printf("'%s'(%d) ", 
-                            eTree->arrpcOperatorStk[i], eTree->arrbOperatorType[i]);
-    printf("\n");
-
     if( !ucExpressionTreeCnt )
     {
         printf("No expression tree exists.\n");
@@ -752,12 +741,31 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
                 if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) &&
                     (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
                 {
-                    printf( "Error: Binary operator '%s' supports integer or float only.\n",
+                    printf( "Error: Arithmetic operator '%s' supports integer or float only.\n",
                                         eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
                     return FALSE;
                 }
                 (eTree->ucOperandStkTop)--;
-                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = INTEGER_TYPE;
+                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = 
+                        ( eTree->arreOperandStk[eTree->ucOperandStkTop-1] | 
+                          eTree->arreOperandStk[eTree->ucOperandStkTop-2]  ) & 
+                        (INTEGER_TYPE+FLOAT_TYPE);
+                (eTree->ucOperatorStkTop)--;
+            }
+            else if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "&")) ||
+                     (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "|"))   )
+            {
+                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+BOOL_TYPE))) &&
+                    (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+BOOL_TYPE)))   )
+                {
+                    printf( "Error: Bitwise/logical operator '%s' supports integer or float only.\n",
+                                                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
+                    return FALSE;
+                }
+                (eTree->ucOperandStkTop)--;
+                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = 
+                        eTree->arreOperandStk[eTree->ucOperandStkTop-1] | 
+                        eTree->arreOperandStk[eTree->ucOperandStkTop-2];
                 (eTree->ucOperatorStkTop)--;
             }
             else
@@ -790,6 +798,7 @@ dataType_t evalExprTree()
 {
     dataType_t eRetStatus = UNDEFINED_TYPE;
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+    unsigned char ucIndex = 0;
 
     /* If no computation is required */
     if( !eTree->ucOperatorStkTop )
@@ -806,7 +815,39 @@ dataType_t evalExprTree()
     }
     else /* computation is required */
     {
-        eRetStatus = INTEGER_TYPE;
+        /* No. of operands should be 1 more than No. of operators */
+        if( 1 == eTree->ucOperandStkTop - eTree->ucOperatorStkTop )
+        {
+            for( ucIndex = eTree->ucOperatorStkTop-1; 
+                    ucIndex < eTree->ucOperatorStkTop; ucIndex-- )
+            {
+                if( (!strcmp(eTree->arrpcOperatorStk[ucIndex],  "<")) &&
+                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "<=")) &&
+                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "==")) &&
+                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "!=")) &&
+                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], ">=")) &&
+                    (!strcmp(eTree->arrpcOperatorStk[ucIndex],  ">"))   )
+                {
+                    printf("5.This error should not occur.\n");
+                    break;
+                }
+
+                if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+BOOL_TYPE))) &&
+                    (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+BOOL_TYPE)))   )
+                {
+                    printf( "Error: Relational operator '%s' supports integer or bool only.\n",
+                                                                eTree->arrpcOperatorStk[ucIndex] );
+                    break;
+                }
+                eRetStatus = BOOL_TYPE;
+                (eTree->ucOperandStkTop)--;
+            }
+            eTree->ucOperatorStkTop = 0;
+        }
+        else /* Operator to operand matching gone wrong */
+        {
+            printf("6.This error should not occur.\n");
+        }
     }
 
     if( UNDEFINED_TYPE == eRetStatus )
