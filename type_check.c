@@ -567,6 +567,26 @@ dataType_t fetchDataType()
     return psVariable->eDataType;
 }
 
+/* API: Fetch parameter data type */
+dataType_t fetchParamDataType( unsigned char ucParamNum )
+{
+    unsigned char ucIndex = 0;
+    if(!psProcedure)
+    {
+        printf("4.This error should not occur.\n");
+        return UNDEFINED_TYPE;
+    }
+    if( !(psProcedure->ucParamCnt) )
+    {
+        printf("Procedure has not arguments.\n");
+        return UNDEFINED_TYPE;
+    }
+    for( ucIndex = 0; ucIndex < psProcedure->ucParamCnt; ucIndex++)
+    {
+    }
+    return (INTEGER_TYPE+BOOL_TYPE);
+}
+
 /* API: Authenticate procedure scope */
 bool_t authProc()
 {
@@ -810,7 +830,7 @@ dataType_t evalExprTree()
         }
         else
         {
-            printf("4.This error should not occur.\n");
+            printf("5.This error should not occur.\n");
         }
     }
     else /* computation is required */
@@ -828,7 +848,7 @@ dataType_t evalExprTree()
                     (!strcmp(eTree->arrpcOperatorStk[ucIndex], ">=")) &&
                     (!strcmp(eTree->arrpcOperatorStk[ucIndex],  ">"))   )
                 {
-                    printf("5.This error should not occur.\n");
+                    printf("6.This error should not occur.\n");
                     break;
                 }
 
@@ -846,7 +866,7 @@ dataType_t evalExprTree()
         }
         else /* Operator to operand matching gone wrong */
         {
-            printf("6.This error should not occur.\n");
+            printf("7.This error should not occur.\n");
         }
     }
 

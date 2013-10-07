@@ -183,6 +183,11 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     {
         case 0:
         {
+            if( !(eExprEval & fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) )) )
+            {
+                printf("Procedure signature mismatch.\n");
+                return FALSE;
+            }
             if(0 != strcmp(psToken->pcToken, ","))
             {
                 *bIsTokIncrNeeded = FALSE;

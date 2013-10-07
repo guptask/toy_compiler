@@ -128,6 +128,9 @@ bool_t authDataType();
 /* Fetch data type */
 dataType_t fetchDataType();
 
+/* API: Fetch parameter data type */
+dataType_t fetchParamDataType( unsigned char ucParamNum );
+
 /* Authenticate procedure scope */
 bool_t authProc();
 
