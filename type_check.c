@@ -30,6 +30,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
 {
     variable_t  *psTemp = NULL;
     procedure_t *psNode = NULL;
+    psVariable          = NULL;
 
     if(uiNestingLevel < 1)
     {
@@ -92,6 +93,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
 
             psNode->arrpsParam[psNode->ucParamCnt++] = psTemp;
         }
+        psVariable = psTemp;
     }
     return TRUE;
 }
@@ -112,6 +114,7 @@ bool_t fillVarName( tokenListEntry_t *psToken )
     }
     else
     {
+        /* If at program level */
         if(uiNestingLevel == 1)
         {
             if(TRUE == bIsCurrDeclGlobal)
@@ -123,6 +126,7 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 psTemp = psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt-1];
             }
 
+            /* Compare variable name with global variable names */
             for(ucTempCount = 0; psProgram->ucGlobalVarCnt > 0; ucTempCount++)
             {
                 if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalVarCnt-1) ) break;
@@ -137,6 +141,8 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                     }
                 }
             }
+
+            /* Compare variable name with local variable names */
             for(ucTempCount = 0; psProgram->ucLocalVarCnt > 0; ucTempCount++)
             {
                 if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalVarCnt) ) break;
@@ -152,7 +158,7 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 }
             }
         }
-        else
+        else /* when at procedure level */
         {
             if(TRUE == bIsGlobalChain)
             {
@@ -192,6 +198,11 @@ bool_t fillVarName( tokenListEntry_t *psToken )
             printf("Error2 in type checking for variable name.\n");
             return FALSE;
         }
+        if( psVariable != psTemp )
+        {
+            printf("Internally something is wrong in variable addressing-1.\n");
+            return FALSE;
+        }
         psTemp->pcVarName = psToken->pcToken;
     }
     return bRetStatus;
@@ -200,130 +211,38 @@ bool_t fillVarName( tokenListEntry_t *psToken )
 /* API: Fill arr size */
 bool_t fillArrSize( tokenListEntry_t *psToken )
 {
-    variable_t  *psTemp = NULL;
-    procedure_t *psNode = NULL;
-
-    if(uiNestingLevel < 1)
+    if( !psVariable )
     {
-        printf("Incorrect nesting scenario for variable. Needs to be tested-3.\n");
+        printf("Internally something is wrong in variable addressing-2.\n");
         return FALSE;
     }
-    else
-    {
-        if(uiNestingLevel == 1)
-        {
-            if(TRUE == bIsCurrDeclGlobal)
-            {
-                psTemp = psProgram->arrpsGlobalVar[psProgram->ucGlobalVarCnt-1];
-            }
-            else
-            {
-                psTemp = psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt-1];
-            }
-        }
-        else
-        {
-            if(TRUE == bIsGlobalChain)
-            {
-                psNode = psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt-1];
-            }
-            else
-            {
-                psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
-            }
-
-            unsigned int uiTempCount = uiNestingLevel-2;
-            while( psNode && (uiTempCount-- > 0) )
-            {
-                psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
-            }
-
-            if(!psNode)
-            {
-                printf("Error in type checking for variable arr size.\n");
-                return FALSE;
-            }
-            psTemp = psNode->arrpsParam[psNode->ucParamCnt-1];
-        }
-
-        if(!psTemp)
-        {
-            printf("Error2 in type checking for variable arr size.\n");
-            return FALSE;
-        }
-        psTemp->pcArrSize = psToken->pcToken;
-    }
+    psVariable->pcArrSize = psToken->pcToken;
     return TRUE;
 }
 
 /* API: Fill variable in or out */
 bool_t fillParamType( tokenListEntry_t *psToken )
 {
-    variable_t  *psTemp = NULL;
-    procedure_t *psNode = NULL;
-
-    if(uiNestingLevel < 2)
+    if( !psVariable )
     {
-        printf("Incorrect nesting scenario for variable. Needs to be tested-4.\n");
+        printf("Internally something is wrong in variable addressing-3.\n");
         return FALSE;
     }
     else
     {
-        if(uiNestingLevel == 2)
-        {
-            if(TRUE == bIsCurrDeclGlobal)
-            {
-                psTemp = psProgram->arrpsGlobalVar[psProgram->ucGlobalVarCnt-1];
-            }
-            else
-            {
-                psTemp = psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt-1];
-            }
-        }
-        else
-        {
-            if(TRUE == bIsGlobalChain)
-            {
-                psNode = psProgram->arrpsGlobalProc[psProgram->ucGlobalProcCnt-1];
-            }
-            else
-            {
-                psNode = psProgram->arrpsLocalProc[psProgram->ucLocalProcCnt-1];
-            }
-
-            unsigned int uiTempCount = uiNestingLevel-2;
-            while(uiTempCount-- > 0)
-            {
-                psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
-            }
-
-            if(!psNode)
-            {
-                printf("Error in type checking for param type.\n");
-                return FALSE;
-            }
-            psTemp = psNode->arrpsParam[psNode->ucParamCnt-1];
-        }
-
-        if(!psTemp)
-        {
-            printf("Error2 in type checking for param type.\n");
-            return FALSE;
-        }
-
         if( 0 == strcmp(psToken->pcToken, "in") )
         {
-            psTemp->bIsParam    = TRUE;
-            psTemp->bIsOutParam = FALSE;
+            psVariable->bIsParam    = TRUE;
+            psVariable->bIsOutParam = FALSE;
         }
         else if( 0 == strcmp(psToken->pcToken, "out") )
         {
-            psTemp->bIsParam    = TRUE;
-            psTemp->bIsOutParam = TRUE;
+            psVariable->bIsParam    = TRUE;
+            psVariable->bIsOutParam = TRUE;
         }
         else
         {
-            printf("Error3 in type checking for param type.\n");
+            printf("Internally something is wrong in variable addressing-4.\n");
             return FALSE;
         }
     }
@@ -367,6 +286,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
                 bIsGlobalChain = FALSE;
             }
 
+            /* Check for name conflict with global procedure */
             for(ucTempCount = 0; psProgram->ucGlobalProcCnt > 0; ucTempCount++)
             {
                 if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucGlobalProcCnt-1) ) break;
@@ -381,6 +301,8 @@ bool_t fillProcName( tokenListEntry_t *psToken )
                     }
                 }
             }
+
+            /* Check for name conflict with local procedure */
             for(ucTempCount = 0; psProgram->ucLocalProcCnt > 0; ucTempCount++)
             {
                 if( (TRUE == bIsCurrDeclGlobal) && (ucTempCount >= psProgram->ucLocalProcCnt) ) break;
@@ -408,7 +330,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
             }
 
             uiNestCount = uiNestingLevel-3;
-            while(uiNestCount-- > 0)
+            while( psNode && (uiNestCount-- > 0) )
             {
                 psNode = psNode->arrpsIntrnlProc[psNode->ucIntrnlProcCnt-1];
             }
@@ -446,7 +368,7 @@ bool_t authVar()
 
     if(uiNestingLevel < 1)
     {
-        printf("Incorrect nesting scenario for variable. Needs to be tested-5.\n");
+        printf("Incorrect nesting scenario for variable. Needs to be tested-3.\n");
         return FALSE;
     }
 
@@ -581,10 +503,25 @@ dataType_t fetchParamDataType( unsigned char ucParamNum )
         printf("Procedure has not arguments.\n");
         return UNDEFINED_TYPE;
     }
-    for( ucIndex = 0; ucIndex < psProcedure->ucParamCnt; ucIndex++)
+
+    for( ucIndex = 0; (ucIndex < psProcedure->ucParamCnt) &&
+                        (TRUE == psProcedure->arrpsParam[ucIndex]->bIsParam); ucIndex++)
     {
+        if( ucParamNum-1 == ucIndex )
+        {
+            if(EXPR_DEBUG_FLAG)
+            {
+                printf( "Argument = '%s'(%d)\n", psProcedure->arrpsParam[ucIndex]->pcVarName, 
+                                                    psProcedure->arrpsParam[ucIndex]->eDataType );
+            }
+            return (psProcedure->arrpsParam[ucIndex]->eDataType);
+        }
     }
-    return (INTEGER_TYPE+BOOL_TYPE);
+    if( (ucParamNum == 0) || (ucParamNum > ucIndex) )
+    {
+        printf("Invalid paramter number requested.\n");
+    }
+    return UNDEFINED_TYPE;
 }
 
 /* API: Authenticate procedure scope */
@@ -598,7 +535,7 @@ bool_t authProc()
 
     if(uiNestingLevel < 1)
     {
-        printf("Incorrect nesting scenario for procedure. Needs to be tested-6.\n");
+        printf("Incorrect nesting scenario for procedure. Needs to be tested-2.\n");
         return FALSE;
     }
 

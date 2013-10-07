@@ -16,11 +16,11 @@ program aProgram is
         return;
     end procedure;
 
-    procedure newProc1(bool b out)
+    procedure newProc1(integer b out)
     integer g;
     begin
         newProc(g,b);
-        newProc1(g,b);
+        newProc1(g);
         return;
     end procedure;
 

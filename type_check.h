@@ -21,7 +21,7 @@
 #define MAX_LOCAL_PROC_CNT    80
 #define MAX_EXPR_OPERATOR_CNT 40
 #define MAX_EXPR_OPERAND_CNT  80
-#define EXPR_DEBUG_FLAG       1
+#define EXPR_DEBUG_FLAG       0
 
 
 /* Enumeration section */
