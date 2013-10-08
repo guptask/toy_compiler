@@ -9,20 +9,20 @@ program aProgram is
     bool g;
 
     global procedure newProc(integer a in, integer b out)
-    integer g[3];
-    integer test;
-    begin
-        test := g[2+1]*b;
-        return;
-    end procedure;
+        integer g[3];
+        integer test;
+        begin
+            test := g[2+1]*b;
+            return;
+        end procedure;
 
     procedure newProc1(integer b out)
-    integer g;
-    begin
-        newProc(g,b);
-        newProc1(g);
-        return;
-    end procedure;
+        integer g;
+        begin
+            newProc(g,b);
+            newProc1(g);
+            return;
+        end procedure;
 
     begin
         aString := "Testing...";
