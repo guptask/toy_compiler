@@ -7,10 +7,26 @@ program test is
     integer d;
     global integer c;
 
+    procedure newProc1(integer d in, integer b out)
+    integer a[10];
+    begin
+        a[1+1] := d;
+        return;
+    end procedure;
+
     global procedure newProc(integer d in, bool b out)
+    integer f[10];
+    procedure newProc1(integer d in)
     integer f[10];
     begin
         testing[1+1] := c;
+        newProc1(f[2]);
+        return;
+    end procedure;
+
+    begin
+        testing[1+1] := c;
+        newProc1(f[2]);
         return;
     end procedure;
 
@@ -31,6 +47,7 @@ program test is
             testing[a]:= a+1;
         end for;
 
-        newProc(a, 2);
+        newProc(a,1);
+        newProc1(a,2);
         return;
     end program

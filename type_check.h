@@ -119,8 +119,8 @@ bool_t fillProgName( tokenListEntry_t *psNode );
 /* Authenticate variable scope */
 bool_t authVar();
 
-/* API: Authenticate array */
-bool_t authArr( bool_t bLogTrueOrFalse );
+/* Authenticate array */
+bool_t authArr( bool_t bIsArrNotDesired );
 
 /* Authenticate data type */
 bool_t authDataType();
@@ -128,7 +128,10 @@ bool_t authDataType();
 /* Fetch data type */
 dataType_t fetchDataType();
 
-/* API: Fetch parameter data type */
+/* Fetch parameter count */
+unsigned char fetchParamCnt();
+
+/* Fetch parameter data type */
 dataType_t fetchParamDataType( unsigned char ucParamNum );
 
 /* Authenticate procedure scope */

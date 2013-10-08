@@ -66,6 +66,7 @@ static unsigned int  uiTop               = 0;
 static bool_t     bIsTypeCheckSucc = TRUE;
 static dataType_t eExprEval        = UNDEFINED_TYPE;
 static dataType_t eAssignStatement = UNDEFINED_TYPE;
+static unsigned char ucArgCnt      = 0;
 
 /* Definition section */
 
@@ -188,6 +189,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("Procedure signature mismatch.\n");
                 return FALSE;
             }
+            ucArgCnt--;
             if(0 != strcmp(psToken->pcToken, ","))
             {
                 *bIsTokIncrNeeded = FALSE;
@@ -830,6 +832,7 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             if(0 != strcmp(psToken->pcToken, ")"))
             {
+                ucArgCnt = fetchParamCnt();
                 eParserState = ARGUMENT_LIST;
             }
             *bIsTokIncrNeeded = FALSE;
@@ -837,7 +840,7 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 3:
         {
-            if(0 != strcmp(psToken->pcToken, ")"))
+            if( (ucArgCnt) || (0 != strcmp(psToken->pcToken, ")")) )
             {
                 return FALSE;
             }

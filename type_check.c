@@ -440,7 +440,7 @@ bool_t authVar()
 }
 
 /* API: Authenticate array */
-bool_t authArr( bool_t bLogTrueOrFalse )
+bool_t authArr( bool_t bIsArrNotDesired )
 {
     if(!psVariable)
     {
@@ -449,13 +449,13 @@ bool_t authArr( bool_t bLogTrueOrFalse )
     }
     if( !psVariable->pcArrSize )
     {
-        if( FALSE == bLogTrueOrFalse )
+        if( FALSE == bIsArrNotDesired )
         {
             printf("Variable '%s' on line %u is not an array.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
         }
         return FALSE;
     }
-    if( TRUE == bLogTrueOrFalse )
+    if( TRUE == bIsArrNotDesired )
     {
         printf("Variable '%s' on line %u missing array syntax.\n", psAuthToken->pcToken, psAuthToken->uiLineNum);
     }
@@ -487,6 +487,20 @@ dataType_t fetchDataType()
         return FALSE;
     }
     return psVariable->eDataType;
+}
+
+/* API: Fetch parameter count */
+unsigned char fetchParamCnt()
+{
+    unsigned char ucIndex = 0;
+    if(!psProcedure)
+    {
+        printf("8.This error should not occur.\n");
+        return -1;
+    }
+    for( ucIndex = 0; (ucIndex < psProcedure->ucParamCnt) &&
+                        (TRUE == psProcedure->arrpsParam[ucIndex]->bIsParam); ucIndex++);
+    return ucIndex;
 }
 
 /* API: Fetch parameter data type */
@@ -595,7 +609,7 @@ bool_t authProc()
         }
     }
 
-    /* Check for global variable */
+    /* Check for global procedure */
     for(ucTempCount = 0; (FALSE == bRetStatus) && (ucTempCount < psProgram->ucGlobalProcCnt); ucTempCount++)
     {
         if( 0 == strcmp(psAuthToken->pcToken, psProgram->arrpsGlobalProc[ucTempCount]->pcProcName) )
