@@ -338,6 +338,7 @@ tokenListEntry_t* scan( FILE *fpCode )
 
         /* Search for operators, etc. */
         pcTemp = strdup(arrcString);
+        arrcTemp[0]   = 0;
         uiTempIndex = uiLineNum = 0;
         eIsWithinQuote = eHasCmtStarted = eIsOperator = FALSE;
 
