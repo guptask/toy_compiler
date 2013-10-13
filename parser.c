@@ -72,6 +72,7 @@ static unsigned char ucArgCnt      = 0;
 /* Generated C code file parameters */
 static char *pcGenFileName = NULL;
 static FILE *fpGenCode     = NULL;
+static bool_t bCodeGenErr  = FALSE;
 
 
 /* Definition section */
@@ -1339,6 +1340,13 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'is' reserved word missing on line no. %u.\n'", psToken->uiLineNum);
                 return FALSE;
             }
+
+            /* Initialize the gen file */ 
+            if( EOF == fputs("#include<stdio.h>\nmain()\n{\n", fpGenCode) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
         } break;
 
         default:
@@ -1590,8 +1598,11 @@ bool_t parse( tokenListEntry_t *psTokenList )
             {
                 if( psTempList->psNextToken )
                 {
-                    printf("Error. Parsing ends after token '%s' on line no. %u.\n", 
+                    if(FALSE == bCodeGenErr)
+                    {
+                        printf("Error. Parsing ends after token '%s' on line no. %u.\n", 
                                           psTempList->pcToken, psTempList->uiLineNum);
+                    }
                     if( fpGenCode )
                     {
                         fclose(fpGenCode);
@@ -1621,8 +1632,22 @@ bool_t parse( tokenListEntry_t *psTokenList )
 
         if( TRUE != bIsRetSucc )
         {
+            if( TRUE == bCodeGenErr )
+            {
+                printf("Code generation error before or for token '%s' on line no. %u. Exiting.\n", 
+                                                        psTempList->pcToken, psTempList->uiLineNum);
+                if( fpGenCode )
+                {
+                    fclose(fpGenCode);
+                    if( remove(pcGenFileName) )
+                    {
+                        printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+                    }
+                }
+                return FALSE;
+            }
             printf("Parsing error before or for token '%s' on line no. %u. Re-syncing...\n", 
-                            psTempList->pcToken, psTempList->uiLineNum);
+                                                psTempList->pcToken, psTempList->uiLineNum);
 
             /* Re-sync */
             bIsReSyncNeeded = TRUE;
@@ -1684,6 +1709,19 @@ bool_t parse( tokenListEntry_t *psTokenList )
     }
 
     /* Close the generated code parameters */
+    if( EOF == fputs("}\n", fpGenCode) )
+    {
+        printf("Code generation error right at the end. Exiting.\n");
+        if( fpGenCode )
+        {
+            fclose(fpGenCode);
+            if( remove(pcGenFileName) )
+            {
+                printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+            }
+        }
+        return FALSE;
+    }
     fclose(fpGenCode);
     printf("Generated code file is '%s'.\n", pcGenFileName);
 
