@@ -1278,6 +1278,13 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             uiNestingLevel--;
             (void) stackPop();
             *bIsTokIncrNeeded = FALSE;
+
+            /* Close the main loop */
+            if( EOF == fputs("}\n", fpGenCode) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
         } break;
 
         default:
@@ -1708,20 +1715,7 @@ bool_t parse( tokenListEntry_t *psTokenList )
         return FALSE;
     }
 
-    /* Close the generated code parameters */
-    if( EOF == fputs("}\n", fpGenCode) )
-    {
-        printf("Code generation error right at the end. Exiting.\n");
-        if( fpGenCode )
-        {
-            fclose(fpGenCode);
-            if( remove(pcGenFileName) )
-            {
-                printf("Could not remove invalid file '%s'.\n", pcGenFileName);
-            }
-        }
-        return FALSE;
-    }
+    /* Close the generated code file */
     fclose(fpGenCode);
     printf("Generated code file is '%s'.\n", pcGenFileName);
 
