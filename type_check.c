@@ -709,7 +709,7 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
                 (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "+")) ||
                 (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-"))   )
             {
-                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) &&
+                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) ||
                     (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
                 {
                     printf( "Error: Arithmetic operator '%s' supports integer or float only.\n",
@@ -726,7 +726,7 @@ bool_t popuExprTreeOperand( dataType_t eOperand )
             else if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "&")) ||
                      (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "|"))   )
             {
-                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+BOOL_TYPE))) &&
+                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+BOOL_TYPE))) ||
                     (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+BOOL_TYPE)))   )
                 {
                     printf( "Error: Bitwise/logical operator '%s' supports integer or float only.\n",
@@ -803,8 +803,8 @@ dataType_t evalExprTree()
                     break;
                 }
 
-                if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+BOOL_TYPE))) &&
-                    (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+BOOL_TYPE)))   )
+                if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+FLOAT_TYPE+BOOL_TYPE))) ||
+                    (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+FLOAT_TYPE+BOOL_TYPE)))   )
                 {
                     printf( "Error: Relational operator '%s' supports integer or bool only.\n",
                                                                 eTree->arrpcOperatorStk[ucIndex] );
