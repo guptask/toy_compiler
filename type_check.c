@@ -357,6 +357,12 @@ bool_t fillProgName( tokenListEntry_t *psToken )
     return TRUE;
 }
 
+/* API: Fetch program name */
+char *fetchProgName()
+{
+    return psProgram->pcProgName;
+}
+
 /* API: Authenticate variable scope */
 bool_t authVar()
 {

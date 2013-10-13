@@ -116,6 +116,9 @@ bool_t fillProcName( tokenListEntry_t *psNode );
 /* Fill program name */
 bool_t fillProgName( tokenListEntry_t *psNode );
 
+/* Fetch program name */
+char *fetchProgName();
+
 /* Authenticate variable scope */
 bool_t authVar();
 

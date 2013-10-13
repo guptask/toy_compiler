@@ -55,6 +55,7 @@ bool_t           bIsCurrDeclGlobal = FALSE;
 bool_t           bIsCurrProc       = FALSE;
 tokenListEntry_t *psAuthToken      = NULL;
 
+
 /** Static variable(s) **/
 
 /* State stack variables */
@@ -67,6 +68,11 @@ static bool_t     bIsTypeCheckSucc = TRUE;
 static dataType_t eExprEval        = UNDEFINED_TYPE;
 static dataType_t eAssignStatement = UNDEFINED_TYPE;
 static unsigned char ucArgCnt      = 0;
+
+/* Generated C code file parameters */
+static char *pcGenFileName = NULL;
+static FILE *fpGenCode     = NULL;
+
 
 /* Definition section */
 
@@ -1302,6 +1308,28 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
             bIsTypeCheckSucc &= fillProgName(psToken);
+
+            /* Create the generated C code file */
+            if( NULL == (pcGenFileName = fetchProgName()) )
+            {
+                printf("Invalid program name.\n");
+                return FALSE;
+            }
+            if( NULL == (pcGenFileName = strdup(pcGenFileName)) )
+            {
+                printf("Generated file name duplication error.\n");
+                return FALSE;
+            }
+            if( !strcat(pcGenFileName, ".c") )
+            {
+                printf("Generated file name error.\n");
+                return FALSE;
+            }
+            if( !(fpGenCode = fopen(pcGenFileName, "w")) )
+            {
+                printf("Generated code file could not be created.\n");
+                return FALSE;
+            }
         } break;
 
         case 3:
@@ -1355,7 +1383,7 @@ bool_t program( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 }
 
 /* API: Parse the code */
-bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
+bool_t parse( tokenListEntry_t *psTokenList )
 {
     tokenListEntry_t *psTempList = psTokenList;
     bool_t bIsIncrNeeded = TRUE, bIsRetSucc = TRUE, bIsReSyncNeeded = FALSE;
@@ -1376,6 +1404,14 @@ bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
         bIsIncrNeeded = TRUE;
         if( TRUE != stackPush(eParserState) )
         {
+            if( fpGenCode )
+            {
+                fclose(fpGenCode);
+                if( remove(pcGenFileName) )
+                {
+                    printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+                }
+            }
             return FALSE;
         }
 
@@ -1556,6 +1592,14 @@ bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
                 {
                     printf("Error. Parsing ends after token '%s' on line no. %u.\n", 
                                           psTempList->pcToken, psTempList->uiLineNum);
+                    if( fpGenCode )
+                    {
+                        fclose(fpGenCode);
+                        if( remove(pcGenFileName) )
+                        {
+                            printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+                        }
+                    }
                     return FALSE;
                 }
             } break;
@@ -1563,6 +1607,14 @@ bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
             default:
             {
                 if(DEBUG_FLAG) printf("Rule no. %d still remains unhandled.\n", eParserState);
+                if( fpGenCode )
+                {
+                    fclose(fpGenCode);
+                    if( remove(pcGenFileName) )
+                    {
+                        printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+                    }
+                }
                 return FALSE;
             }
         }
@@ -1592,20 +1644,48 @@ bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
     if(MAX_STATE_NUM != eParserState)
     {
         printf("Program body not terminated properly.\n");
+        if( fpGenCode )
+        {
+            fclose(fpGenCode);
+            if( remove(pcGenFileName) )
+            {
+                printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+            }
+        }
         return FALSE;
     }
 
     if(TRUE == bIsReSyncNeeded)
     {
         printf("Resyncing done. Parsing not entirely successful.\n");
+        if( fpGenCode )
+        {
+            fclose(fpGenCode);
+            if( remove(pcGenFileName) )
+            {
+                printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+            }
+        }
         return FALSE;
     }
 
     if(FALSE == bIsTypeCheckSucc)
     {
         printf("Type checking not entirely successful.\n");
+        if( fpGenCode )
+        {
+            fclose(fpGenCode);
+            if( remove(pcGenFileName) )
+            {
+                printf("Could not remove invalid file '%s'.\n", pcGenFileName);
+            }
+        }
         return FALSE;
     }
+
+    /* Close the generated code parameters */
+    fclose(fpGenCode);
+    printf("Generated code file is '%s'.\n", pcGenFileName);
 
     return TRUE;
 }
