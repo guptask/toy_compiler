@@ -51,7 +51,6 @@ int main( int argc, char *argv[] )
         }
     }
 
-
     /* Create the generated C code file */
     char *pcGenFileName = strtok(argv[1], ".");
     if( !strcat(pcGenFileName, ".c") )
