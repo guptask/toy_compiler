@@ -19,3 +19,5 @@ Notes:
    rules have been followed eg. re-using of local variable 
    names in different procedures, etc.
 
+3. GCC version 4.7.2 used during development.
+
