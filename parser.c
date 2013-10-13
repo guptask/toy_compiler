@@ -1355,7 +1355,7 @@ bool_t program( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 }
 
 /* API: Parse the code */
-bool_t parse( tokenListEntry_t *psTokenList )
+bool_t parse( tokenListEntry_t *psTokenList, FILE *fpGenCode )
 {
     tokenListEntry_t *psTempList = psTokenList;
     bool_t bIsIncrNeeded = TRUE, bIsRetSucc = TRUE, bIsReSyncNeeded = FALSE;
