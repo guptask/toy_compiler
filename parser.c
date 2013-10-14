@@ -1320,22 +1320,22 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             /* Create the generated C code file */
             if( NULL == (pcGenFileName = fetchProgName()) )
             {
-                printf("Invalid program name.\n");
+                bCodeGenErr = TRUE;
                 return FALSE;
             }
             if( NULL == (pcGenFileName = strdup(pcGenFileName)) )
             {
-                printf("Generated file name duplication error.\n");
+                bCodeGenErr = TRUE;
                 return FALSE;
             }
             if( !strcat(pcGenFileName, ".c") )
             {
-                printf("Generated file name error.\n");
+                bCodeGenErr = TRUE;
                 return FALSE;
             }
             if( !(fpGenCode = fopen(pcGenFileName, "w")) )
             {
-                printf("Generated code file could not be created.\n");
+                bCodeGenErr = TRUE;
                 return FALSE;
             }
         } break;
