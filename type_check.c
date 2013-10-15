@@ -26,7 +26,7 @@ bool_t initTypeChecking()
     psProgram->ucLocalVarCnt  = psProgram->ucLocalProcCnt  = 0;
 
     /* Pre-populate the runtime APIs */
-    /* getInteger(int a out) */
+    /* getInteger(integer a out) */
     psProc = (procedure_t *) malloc( sizeof(procedure_t) );
     if(!psProc)
     {
@@ -105,7 +105,49 @@ bool_t initTypeChecking()
     psVar->bIsOutParam    = TRUE;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
 
-    /* putInteger(int a in) */
+    /* getString(string a in, integer b out) */
+    psProc = NULL;
+    psVar  = NULL;
+    psProc = (procedure_t *) malloc( sizeof(procedure_t) );
+    if(!psProc)
+    {
+        printf("Failed to allocate space for procedure.\n");
+        return FALSE;
+    }
+    psProc->pcProcName = (char *) malloc( 10*sizeof(char *) );
+    strcpy( psProc->pcProcName, "getString" );
+    psProc->ucIntrnlProcCnt = 0;
+    psProc->ucParamCnt = 2;
+    psVar = (variable_t *) malloc( sizeof(variable_t) );
+    if(!psVar)
+    {
+        printf("Failed to allocate space for variable.\n");
+        return FALSE;
+    }
+    psProc->arrpsParam[0] = psVar;
+    psVar->pcVarName      = NULL;
+    psVar->eDataType      = STRING_TYPE;
+    psVar->pcArrSize      = NULL;
+    psVar->bIsParam       = TRUE;
+    psVar->bIsOutParam    = FALSE;
+
+    psVar = NULL;
+    psVar = (variable_t *) malloc( sizeof(variable_t) );
+    if(!psVar)
+    {
+        printf("Failed to allocate space for variable.\n");
+        return FALSE;
+    }
+    psProc->arrpsParam[1] = psVar;
+    psVar->pcVarName      = NULL;
+    psVar->eDataType      = INTEGER_TYPE;
+    psVar->pcArrSize      = NULL;
+    psVar->bIsParam       = TRUE;
+    psVar->bIsOutParam    = TRUE;
+
+    psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+
+    /* putInteger(integer a in) */
     psProc = (procedure_t *) malloc( sizeof(procedure_t) );
     if(!psProc)
     {
@@ -184,8 +226,32 @@ bool_t initTypeChecking()
     psVar->bIsOutParam    = FALSE;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
 
-
-
+    /* putString(string a in) */
+    psProc = NULL;
+    psVar  = NULL;
+    psProc = (procedure_t *) malloc( sizeof(procedure_t) );
+    if(!psProc)
+    {
+        printf("Failed to allocate space for procedure.\n");
+        return FALSE;
+    }
+    psProc->pcProcName = (char *) malloc( 10*sizeof(char *) );
+    strcpy( psProc->pcProcName, "putString" );
+    psProc->ucIntrnlProcCnt = 0;
+    psProc->ucParamCnt = 1;
+    psVar = (variable_t *) malloc( sizeof(variable_t) );
+    if(!psVar)
+    {
+        printf("Failed to allocate space for variable.\n");
+        return FALSE;
+    }
+    psProc->arrpsParam[0] = psVar;
+    psVar->pcVarName      = NULL;
+    psVar->eDataType      = STRING_TYPE;
+    psVar->pcArrSize      = NULL;
+    psVar->bIsParam       = TRUE;
+    psVar->bIsOutParam    = FALSE;
+    psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
 
     return TRUE;
 }

@@ -28,9 +28,11 @@ program aProgram is
         getInteger(a);
         getBool(g);
         getFloat(f);
+        getString(aString, a);
         putInteger(a);
         putBool(g);
         putFloat(f);
+        putString(aString);
         aString := "Testing...";
         testing[1] := not g | (a * -b) + c*d + f/1;
 
