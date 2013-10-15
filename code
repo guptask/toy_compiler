@@ -5,7 +5,7 @@ program aProgram is
     integer b;
     integer c;
     integer d;
-    integer f;
+    float f;
     bool g;
 
     global procedure newProc(integer a in, integer b out)
@@ -25,6 +25,12 @@ program aProgram is
         end procedure;
 
     begin
+        getInteger(a);
+        getBool(g);
+        getFloat(f);
+        putInteger(a);
+        putBool(g);
+        putFloat(f);
         aString := "Testing...";
         testing[1] := not g | (a * -b) + c*d + f/1;
 

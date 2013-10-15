@@ -128,6 +128,9 @@ bool_t authArr( bool_t bIsArrNotDesired );
 /* Authenticate data type */
 bool_t authDataType();
 
+/* Fetch procedure name */
+char *fetchProcName();
+
 /* Fetch data type */
 dataType_t fetchDataType();
 

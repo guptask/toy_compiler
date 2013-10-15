@@ -193,7 +193,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             if( !(eExprEval & fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) )) )
             {
-                printf("Procedure signature mismatch.\n");
+                printf("Procedure '%s' signature mismatch.\n", fetchProcName());
                 return FALSE;
             }
             ucArgCnt--;
@@ -837,9 +837,13 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
+            ucArgCnt = fetchParamCnt();
+            if( (0 == strcmp(psToken->pcToken, ")")) && ucArgCnt )
+            {
+                return FALSE;
+            }
             if(0 != strcmp(psToken->pcToken, ")"))
             {
-                ucArgCnt = fetchParamCnt();
                 eParserState = ARGUMENT_LIST;
             }
             *bIsTokIncrNeeded = FALSE;
