@@ -9,12 +9,14 @@ build the ctags links, type    :  ./make-ctags
 (needed only for code browsing)
 
 To test a sample code, type    : ./compile <code_sample>
-
+(code samples are present in 
+'test' directory)
 
 Notes:
 -----
 
-1. 'code' and 'code2' are code samples in this directory.
+1. 'code' and 'code2' are code samples present in the 'test' 
+   directory.
 
 2. For special cases not mentioned in guidelines, C-type 
    rules have been followed eg. re-using of local variable 
@@ -22,7 +24,7 @@ Notes:
 
 3. GCC version 4.7.2 used during development.
 
-4. Runtime library procedure signatures (used in code samples) are:
+4. Runtime library procedures (used in code samples) are:
    :- getInteger(integer a out)
    :- getBool(bool a out)
    :- getFloat(float a out)
