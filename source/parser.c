@@ -1,6 +1,7 @@
 /* Include section */
 #include "parser.h"
 #include "type_check.h"
+#include "code_generation.h"
 
 
 /* Macro section */
@@ -1284,7 +1285,7 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             *bIsTokIncrNeeded = FALSE;
 
             /* Close the main loop */
-            if( EOF == fputs("}\n", fpGenCode) )
+            if( TRUE != genCodeTermination(fpGenCode) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
@@ -1353,7 +1354,7 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
 
             /* Initialize the gen file */ 
-            if( EOF == fputs("#include<stdio.h>\nmain()\n{\n", fpGenCode) )
+            if( TRUE != genCodeHeader(fpGenCode) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
