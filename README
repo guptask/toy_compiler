@@ -4,7 +4,8 @@
 
 To build the compiler, type    :  make
 
-To build the ctags links, type :  ./make-ctags
+In the 'source' directory, to 
+build the ctags links, type    :  ./make-ctags
 (needed only for code browsing)
 
 To test a sample code, type    : ./compile <code_sample>
@@ -22,12 +23,12 @@ Notes:
 3. GCC version 4.7.2 used during development.
 
 4. Runtime library procedure signatures (used in code samples) are:
-     * getInteger(integer a out)
-     * getBool(bool a out)
-     * getFloat(float a out)
-     * getString(string a in, integer b out)
-     * putInteger(integer a in)
-     * putBool(bool a in)
-     * putFloat(float a in)
-     * putString(string a in)
+   :- getInteger(integer a out)
+   :- getBool(bool a out)
+   :- getFloat(float a out)
+   :- getString(string a in, integer b out)
+   :- putInteger(integer a in)
+   :- putBool(bool a in)
+   :- putFloat(float a in)
+   :- putString(string a in)
 
