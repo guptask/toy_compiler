@@ -4,13 +4,14 @@
 
 /* Macro section */
 #define LENGTH_OF_EACH_LINE     100
-#define NO_OF_HEADER_LINES        2
+#define NO_OF_HEADER_LINES        3
 #define NO_OF_TERMINATION_LINES   2
 
 
 /* Static declaration section */
 static char arrcHeader[NO_OF_HEADER_LINES][LENGTH_OF_EACH_LINE] = {
     "#include <stdio.h>\n",
+    "#include \"run_time.h\"\n",
     "int main() {\n"
 };
 
