@@ -8,6 +8,16 @@
 /* Header section */
 #include "scan_parse_common.h"
 
+/* Global variables */
+/* Generated C code file parameters */
+extern char *pcGenFileName;
+extern FILE *fpGenCode;
+extern bool_t bCodeGenErr;
+
+
+/* Macro section */
+#define LENGTH_OF_EACH_LINE     100
+
 
 /* Declaration section */
 
@@ -17,7 +27,8 @@ bool_t genCodeHeader( FILE *fpCode );
 /* Write the termination */
 bool_t genCodeTermination( FILE *fpCode );
 
-
+/* Write the string sent as input */
+bool_t genCodeInputString( char *arrcStr, FILE *fpCode );
 
 
 

@@ -56,6 +56,11 @@ bool_t           bIsCurrDeclGlobal = FALSE;
 bool_t           bIsCurrProc       = FALSE;
 tokenListEntry_t *psAuthToken      = NULL;
 
+/* Generated C code file parameters */
+char *pcGenFileName = NULL;
+FILE *fpGenCode     = NULL;
+bool_t bCodeGenErr  = FALSE;
+
 
 /** Static variable(s) **/
 
@@ -69,11 +74,6 @@ static bool_t     bIsTypeCheckSucc = TRUE;
 static dataType_t eExprEval        = UNDEFINED_TYPE;
 static dataType_t eAssignStatement = UNDEFINED_TYPE;
 static unsigned char ucArgCnt      = 0;
-
-/* Generated C code file parameters */
-static char *pcGenFileName = NULL;
-static FILE *fpGenCode     = NULL;
-static bool_t bCodeGenErr  = FALSE;
 
 
 /* Definition section */

@@ -1,5 +1,6 @@
 /* Include section */
 #include "type_check.h"
+#include "code_generation.h"
 
 /* Macro Section */
 #define MAX_EXPR_TREE_ARR_LEN 20
@@ -486,6 +487,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
     procedure_t *psTemp = NULL, *psNode = NULL;
     unsigned int  uiNestCount = 0;
     unsigned char ucTempCount = 0;
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
 
     if(uiNestingLevel < 2)
     {
@@ -578,6 +580,15 @@ bool_t fillProcName( tokenListEntry_t *psToken )
             }
         }
     }
+
+    /* Generate the goto tag */
+    sprintf(arrcStr, "_%p_%s_ :\n", psTemp, psToken->pcToken);
+    if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+
     return TRUE;
 }
 

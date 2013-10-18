@@ -3,7 +3,6 @@
 
 
 /* Macro section */
-#define LENGTH_OF_EACH_LINE     100
 #define NO_OF_HEADER_LINES        3
 #define NO_OF_TERMINATION_LINES   2
 
@@ -55,6 +54,20 @@ bool_t genCodeTermination( FILE *fpCode )
         {
             return FALSE;
         }
+    }
+    return TRUE;
+}
+
+/* API: Write the string sent as input */
+bool_t genCodeInputString( char *arrcStr, FILE *fpCode )
+{
+    if( !fpCode )
+    {
+        return FALSE;
+    }
+    if( EOF == fputs(arrcStr, fpCode) )
+    {
+        return FALSE;
     }
     return TRUE;
 }
