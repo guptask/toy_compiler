@@ -796,6 +796,29 @@ dataType_t fetchParamDataType( unsigned char ucParamNum )
     return UNDEFINED_TYPE;
 }
 
+/* API: Generate the runtime procedure code */
+bool_t genRuntimeProcCode()
+{
+    unsigned char ucIndex             = 0;
+    procedure_t *psTempProc           = NULL;
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
+    for(ucIndex = 0; ucIndex < psProgram->ucGlobalProcCnt; ucIndex++)
+    {
+        if( !(psTempProc = psProgram->arrpsGlobalProc[ucIndex]) )
+        {
+            return FALSE;
+        }
+        sprintf(arrcStr, "_%p_%s_ :\n", psTempProc, psTempProc->pcProcName);
+        if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+        {
+            return FALSE;
+        }
+        //need to add the def here using a pre-defined array
+    }
+    return TRUE;
+}
+
 /* API: Authenticate procedure scope */
 bool_t authProc()
 {

@@ -137,6 +137,9 @@ dataType_t fetchDataType();
 /* Fetch parameter count */
 unsigned char fetchParamCnt();
 
+/* Generate the runtime procedure code */
+bool_t genRuntimeProcCode();
+
 /* Fetch parameter data type */
 dataType_t fetchParamDataType( unsigned char ucParamNum );
 

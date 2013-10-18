@@ -1370,6 +1370,12 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 bCodeGenErr = TRUE;
                 return FALSE;
             }
+
+            if( TRUE != genRuntimeProcCode() )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
         } break;
 
         default:
