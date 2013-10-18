@@ -1238,6 +1238,8 @@ bool_t declaration( tokenListEntry_t *psToken, bool_t bIsGlobal, bool_t *bIsTokI
 */
 bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     switch( sStack[uiTop-1].uiCount )
     {
         case 1:
@@ -1254,6 +1256,14 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             if( 0 != strcmp(psToken->pcToken, "begin") )
             {
                 printf("'begin' reserved word missing on line no. %u.\n", psToken->uiLineNum);
+                return FALSE;
+            }
+
+            /* Generate the program body tag */
+            sprintf(arrcStr, "_program_body_ :\n");
+            if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+            {
+                bCodeGenErr = TRUE;
                 return FALSE;
             }
         } break;
