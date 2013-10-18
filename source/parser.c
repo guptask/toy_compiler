@@ -1,4 +1,5 @@
 /* Include section */
+#include <unistd.h>
 #include "parser.h"
 #include "type_check.h"
 #include "code_generation.h"
@@ -1417,6 +1418,8 @@ bool_t parse( tokenListEntry_t *psTokenList )
 {
     tokenListEntry_t *psTempList = psTokenList;
     bool_t bIsIncrNeeded = TRUE, bIsRetSucc = TRUE, bIsReSyncNeeded = FALSE;
+    char cGenCodeCompile = 0;
+
     if(NULL == psTempList)
     {
         printf("No token(s) found for parser.\n");
@@ -1733,6 +1736,22 @@ bool_t parse( tokenListEntry_t *psTokenList )
     /* Close the generated code file */
     fclose(fpGenCode);
     printf("Generated code file is '%s'.\n", pcGenFileName);
+
+    /* Compile the generated code file */
+    printf("Do you want to compile '%s' ? [y/n]: ", pcGenFileName);
+    scanf("%c", &cGenCodeCompile);
+    if( ('y' == cGenCodeCompile) || ('Y' == cGenCodeCompile) )
+    {
+        printf("'a.out' will be created on successful compilation.\n");
+        if( -1 == execl("/usr/bin/gcc", "gcc", pcGenFileName, NULL) )
+        {
+            printf("Compilation of '%s' failed. Try manual compilation.\n", pcGenFileName);
+        }
+    }
+    else
+    {
+        printf("You chose not to auto-compile '%s' :(\n", pcGenFileName);
+    }
 
     return TRUE;
 }
