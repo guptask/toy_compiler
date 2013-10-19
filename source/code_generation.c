@@ -3,17 +3,34 @@
 
 
 /* Macro section */
-#define NO_OF_HEADER_LINES        3
+#define NO_OF_HEADER_LINES        4
 #define NO_OF_TERMINATION_LINES   2
 
+/** Global variables **/
 
-/* Static declaration section */
+/* Generated C code file parameters */
+char *pcGenFileName = NULL;
+FILE *fpGenCode     = NULL;
+bool_t bCodeGenErr  = FALSE;
+
+/* Code parameters */
+unsigned int uiRegCount = 0;
+unsigned int uiStackPtr = 0;
+unsigned int uiHeapPtr  = 0;
+unsigned int uiFramePtr = 0;
+
+
+/** Static variables **/
+
+/* Header details */
 static char arrcHeader[NO_OF_HEADER_LINES][LENGTH_OF_EACH_LINE] = {
     "#include <stdio.h>\n",
     "#include \"run_time.h\"\n",
-    "int main() {\n"
+    "int main() {\n",
+    "\tgoto _program_body_;\n"
 };
 
+/* Termination details */
 static char arrcTermination[NO_OF_TERMINATION_LINES][LENGTH_OF_EACH_LINE] = {
     "\n\treturn 0;\n",
     "}\n"

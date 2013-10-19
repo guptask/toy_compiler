@@ -57,11 +57,6 @@ bool_t           bIsCurrDeclGlobal = FALSE;
 bool_t           bIsCurrProc       = FALSE;
 tokenListEntry_t *psAuthToken      = NULL;
 
-/* Generated C code file parameters */
-char *pcGenFileName = NULL;
-FILE *fpGenCode     = NULL;
-bool_t bCodeGenErr  = FALSE;
-
 
 /** Static variable(s) **/
 

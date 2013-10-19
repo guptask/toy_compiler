@@ -8,11 +8,18 @@
 /* Header section */
 #include "scan_parse_common.h"
 
-/* Global variables */
+/** Global variables **/
+
 /* Generated C code file parameters */
 extern char *pcGenFileName;
 extern FILE *fpGenCode;
 extern bool_t bCodeGenErr;
+
+/* Code parameters */
+extern unsigned int uiRegCount;
+extern unsigned int uiStackPtr;
+extern unsigned int uiHeapPtr;
+extern unsigned int uiFramePtr;
 
 
 /* Macro section */
@@ -29,13 +36,6 @@ bool_t genCodeTermination( FILE *fpCode );
 
 /* Write the string sent as input */
 bool_t genCodeInputString( char *arrcStr, FILE *fpCode );
-
-
-
-
-
-
-
 
 
 
