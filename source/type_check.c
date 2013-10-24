@@ -37,20 +37,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 11*sizeof(char *) );
     strcpy( psProc->pcProcName, "getInteger" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = INTEGER_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = TRUE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = INTEGER_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = TRUE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* getBool(bool a out) */
     psProc = NULL;
@@ -64,20 +66,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 8*sizeof(char *) );
     strcpy( psProc->pcProcName, "getBool" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = BOOL_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = TRUE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = BOOL_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = TRUE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* getFloat(float a out) */
     psProc = NULL;
@@ -91,20 +95,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 9*sizeof(char *) );
     strcpy( psProc->pcProcName, "getFloat" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = FLOAT_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = TRUE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = FLOAT_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = TRUE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* getString(string a in, integer b out) */
     psProc = NULL;
@@ -118,19 +124,20 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 10*sizeof(char *) );
     strcpy( psProc->pcProcName, "getString" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 2;
+    psProc->ucVariableCnt = 2;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = STRING_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = FALSE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = STRING_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = FALSE;
+    psVar->uiCallStkDisp     = 1;
 
     psVar = NULL;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
@@ -139,14 +146,16 @@ bool_t initTypeChecking()
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[1] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = INTEGER_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = TRUE;
+    psProc->arrpsVariable[1] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = INTEGER_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = TRUE;
+    psVar->uiCallStkDisp     = 2;
 
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 3;
 
     /* putInteger(integer a in) */
     psProc = (procedure_t *) malloc( sizeof(procedure_t) );
@@ -158,20 +167,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 11*sizeof(char *) );
     strcpy( psProc->pcProcName, "putInteger" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = INTEGER_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = FALSE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = INTEGER_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = FALSE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* putBool(bool a in) */
     psProc = NULL;
@@ -185,20 +196,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 8*sizeof(char *) );
     strcpy( psProc->pcProcName, "putBool" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = BOOL_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = FALSE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = BOOL_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = FALSE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* putFloat(float a in) */
     psProc = NULL;
@@ -212,20 +225,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 9*sizeof(char *) );
     strcpy( psProc->pcProcName, "putFloat" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = FLOAT_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = FALSE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = FLOAT_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = FALSE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     /* putString(string a in) */
     psProc = NULL;
@@ -239,20 +254,22 @@ bool_t initTypeChecking()
     psProc->pcProcName = (char *) malloc( 10*sizeof(char *) );
     strcpy( psProc->pcProcName, "putString" );
     psProc->ucIntrnlProcCnt = 0;
-    psProc->ucParamCnt = 1;
+    psProc->ucVariableCnt = 1;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
     if(!psVar)
     {
         printf("Failed to allocate space for variable.\n");
         return FALSE;
     }
-    psProc->arrpsParam[0] = psVar;
-    psVar->pcVarName      = NULL;
-    psVar->eDataType      = STRING_TYPE;
-    psVar->pcArrSize      = NULL;
-    psVar->bIsParam       = TRUE;
-    psVar->bIsOutParam    = FALSE;
+    psProc->arrpsVariable[0] = psVar;
+    psVar->pcVarName         = NULL;
+    psVar->eDataType         = STRING_TYPE;
+    psVar->pcArrSize         = NULL;
+    psVar->bIsParam          = TRUE;
+    psVar->bIsOutParam       = FALSE;
+    psVar->uiCallStkDisp     = 1;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
+    psProc->uiReturnAddrDisp = 2;
 
     return TRUE;
 }
@@ -285,9 +302,10 @@ bool_t fillVarType( tokenListEntry_t *psToken )
         else if ( 0 == strcmp(psToken->pcToken,  "string") ) psTemp->eDataType = STRING_TYPE;
         else                                                 psTemp->eDataType = UNDEFINED_TYPE;
 
-        psTemp->pcArrSize   = NULL;
-        psTemp->bIsParam    = FALSE;
-        psTemp->bIsOutParam = FALSE;
+        psTemp->pcArrSize     = NULL;
+        psTemp->bIsParam      = FALSE;
+        psTemp->bIsOutParam   = FALSE;
+        psTemp->uiCallStkDisp = 0;
 
         if(uiNestingLevel == 1)
         {
@@ -323,7 +341,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
                 return FALSE;
             }
 
-            psNode->arrpsParam[psNode->ucParamCnt++] = psTemp;
+            psNode->arrpsVariable[psNode->ucVariableCnt++] = psTemp;
         }
         psVariable = psTemp;
     }
@@ -413,16 +431,16 @@ bool_t fillVarName( tokenListEntry_t *psToken )
                 return FALSE;
             }
 
-            for(ucTempCount = 0; ucTempCount < psNode->ucParamCnt-1; ucTempCount++)
+            for(ucTempCount = 0; ucTempCount < psNode->ucVariableCnt-1; ucTempCount++)
             {
-                if( 0 == strcmp(psToken->pcToken, psNode->arrpsParam[ucTempCount]->pcVarName) )
+                if( 0 == strcmp(psToken->pcToken, psNode->arrpsVariable[ucTempCount]->pcVarName) )
                 {
                     printf("Multiple declarations of variable '%s' in same scope on line %u.\n", 
                                                             psToken->pcToken, psToken->uiLineNum);
                     bRetStatus = FALSE;
                 }
             }
-            psTemp = psNode->arrpsParam[psNode->ucParamCnt-1];
+            psTemp = psNode->arrpsVariable[psNode->ucVariableCnt-1];
         }
 
         if(!psTemp)
@@ -502,9 +520,10 @@ bool_t fillProcName( tokenListEntry_t *psToken )
             printf("Failed to allocate space for procedure.\n");
             return FALSE;
         }
-        psTemp->pcProcName = psToken->pcToken;
-        psTemp->ucParamCnt = 0;
-        psTemp->ucIntrnlProcCnt = 0;
+        psTemp->pcProcName       = psToken->pcToken;
+        psTemp->ucVariableCnt       = 0;
+        psTemp->ucIntrnlProcCnt  = 0;
+        psTemp->uiReturnAddrDisp = 0;
 
         if(uiNestingLevel == 2)
         {
@@ -658,12 +677,12 @@ bool_t authVar()
             return FALSE;
         }
 
-        for(ucTempCount = 0; ucTempCount < psProc->ucParamCnt; ucTempCount++)
+        for(ucTempCount = 0; ucTempCount < psProc->ucVariableCnt; ucTempCount++)
         {
-            if( 0 == strcmp(psAuthToken->pcToken, psProc->arrpsParam[ucTempCount]->pcVarName) )
+            if( 0 == strcmp(psAuthToken->pcToken, psProc->arrpsVariable[ucTempCount]->pcVarName) )
             {
                 bRetStatus = TRUE;
-                psVariable = psProc->arrpsParam[ucTempCount];
+                psVariable = psProc->arrpsVariable[ucTempCount];
                 break;
             }
         }
@@ -756,8 +775,8 @@ unsigned char fetchParamCnt()
         printf("8.This error should not occur.\n");
         return -1;
     }
-    for( ucIndex = 0; (ucIndex < psProcedure->ucParamCnt) &&
-                        (TRUE == psProcedure->arrpsParam[ucIndex]->bIsParam); ucIndex++);
+    for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++);
     return ucIndex;
 }
 
@@ -770,23 +789,23 @@ dataType_t fetchParamDataType( unsigned char ucParamNum )
         printf("4.This error should not occur.\n");
         return UNDEFINED_TYPE;
     }
-    if( !(psProcedure->ucParamCnt) )
+    if( !(psProcedure->ucVariableCnt) )
     {
         printf("Procedure has not arguments.\n");
         return UNDEFINED_TYPE;
     }
 
-    for( ucIndex = 0; (ucIndex < psProcedure->ucParamCnt) &&
-                        (TRUE == psProcedure->arrpsParam[ucIndex]->bIsParam); ucIndex++)
+    for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++)
     {
         if( ucParamNum-1 == ucIndex )
         {
             if(EXPR_DEBUG_FLAG)
             {
-                printf( "Argument = '%s'(%d)\n", psProcedure->arrpsParam[ucIndex]->pcVarName, 
-                                                    psProcedure->arrpsParam[ucIndex]->eDataType );
+                printf( "Argument = '%s'(%d)\n", psProcedure->arrpsVariable[ucIndex]->pcVarName, 
+                                                    psProcedure->arrpsVariable[ucIndex]->eDataType );
             }
-            return (psProcedure->arrpsParam[ucIndex]->eDataType);
+            return (psProcedure->arrpsVariable[ucIndex]->eDataType);
         }
     }
     if( (ucParamNum == 0) || (ucParamNum > ucIndex) )

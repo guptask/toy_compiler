@@ -46,6 +46,7 @@ typedef struct variable_s
     char                *pcArrSize;
     bool_t              bIsParam;
     bool_t              bIsOutParam;
+    unsigned int        uiCallStkDisp;
 
 } variable_t;
 
@@ -53,10 +54,11 @@ typedef struct variable_s
 typedef struct procedure_s
 {
     char                *pcProcName;
-    unsigned char       ucParamCnt;
-    variable_t          *arrpsParam[MAX_PROC_PARAM_CNT];
+    unsigned char       ucVariableCnt;
+    variable_t          *arrpsVariable[MAX_PROC_PARAM_CNT];
     unsigned char       ucIntrnlProcCnt;
     struct procedure_s  *arrpsIntrnlProc[MAX_INTRNL_PROC_CNT];
+    unsigned int        uiReturnAddrDisp;
 
 } procedure_t;
 

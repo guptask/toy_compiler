@@ -3,7 +3,7 @@
 
 
 /* Macro section */
-#define NO_OF_HEADER_LINES        4
+#define NO_OF_HEADER_LINES        17
 #define NO_OF_TERMINATION_LINES   2
 
 /** Global variables **/
@@ -25,14 +25,31 @@ unsigned int uiFramePtr = 0;
 /* Header details */
 static char arrcHeader[NO_OF_HEADER_LINES][LENGTH_OF_EACH_LINE] = {
     "#include <stdio.h>\n",
-    "#include \"run_time.h\"\n",
+    "#include \"run_time.h\"\n\n",
+
+    "#define NUM_OF_REGISTERS 0xFF\n",
+    "#define MM_SIZE          0xFFFF\n",
+    "#define CHAR_BUFFER_SIZE 0xFFF\n",
+    "#define true             1\n",
+    "#define false            0\n\n",
+
+    "int   R[NUM_OF_REGISTERS]           = {0};\n",
+    "int   MM[MM_SIZE]                   = {0};\n",
+    "char  CHAR_BUFFER[CHAR_BUFFER_SIZE] = {0};\n",
+    "float FLOAT_VAR                     = 0.0;\n\n",
+
+    "/* Stack pointer */\n",
+    "int SP = 0;\n",
+    "/* Heap pointer */\n",
+    "int HP = MM_SIZE-1;\n\n",
+
     "int main() {\n",
-    "\tgoto _program_body_;\n"
+    "    goto _program_body_;\n\n"
 };
 
 /* Termination details */
 static char arrcTermination[NO_OF_TERMINATION_LINES][LENGTH_OF_EACH_LINE] = {
-    "\n\treturn 0;\n",
+    "\n    return 0;\n",
     "}\n"
 };
 
