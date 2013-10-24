@@ -1741,9 +1741,9 @@ bool_t parse( tokenListEntry_t *psTokenList )
     /* Compile the generated code file */
     printf("Do you want to compile '%s' ? [y/n]: ", pcGenFileName);
     scanf("%c", &cGenCodeCompile);
+    system("rm -f a.out");
     if( ('y' == cGenCodeCompile) || ('Y' == cGenCodeCompile) )
     {
-        system("rm -f a.out");
         printf("'a.out' will be created on successful compilation.\n");
         if( -1 == execl("/usr/bin/gcc", "gcc", pcGenFileName, NULL) )
         {
