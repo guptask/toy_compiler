@@ -29,14 +29,16 @@ extern unsigned int uiFramePtr;
 /* Declaration section */
 
 /* Write the header */
-bool_t genCodeHeader( FILE *fpCode );
+bool_t genCodeHeader();
 
 /* Write the termination */
-bool_t genCodeTermination( FILE *fpCode );
+bool_t genCodeTermination();
 
 /* Write the string sent as input */
-bool_t genCodeInputString( char *arrcStr, FILE *fpCode );
+bool_t genCodeInputString( char *pcStr );
 
+/* Add the runtime definitions */
+bool_t genCodeAddRuntimeDef( char *pcProcName );
 
 
 

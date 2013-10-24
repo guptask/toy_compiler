@@ -602,7 +602,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
 
     /* Generate the goto tag */
     sprintf(arrcStr, "_%p_%s_ :\n", psTemp, psToken->pcToken);
-    if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+    if( TRUE != genCodeInputString(arrcStr) )
     {
         bCodeGenErr = TRUE;
         return FALSE;
@@ -829,11 +829,14 @@ bool_t genRuntimeProcCode()
             return FALSE;
         }
         sprintf(arrcStr, "_%p_%s_ :\n", psTempProc, psTempProc->pcProcName);
-        if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+        if( TRUE != genCodeInputString(arrcStr) )
         {
             return FALSE;
         }
-        //need to add the def here using a pre-defined array
+        if( TRUE != genCodeAddRuntimeDef(psTempProc->pcProcName) )
+        {
+            return FALSE;
+        }
     }
     return TRUE;
 }

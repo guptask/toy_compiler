@@ -1257,7 +1257,7 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
             /* Generate the program body tag */
             sprintf(arrcStr, "_program_body_ :\n");
-            if( TRUE != genCodeInputString(arrcStr, fpGenCode) )
+            if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
@@ -1291,7 +1291,7 @@ bool_t program_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             *bIsTokIncrNeeded = FALSE;
 
             /* Close the main loop */
-            if( TRUE != genCodeTermination(fpGenCode) )
+            if( TRUE != genCodeTermination() )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
@@ -1360,7 +1360,7 @@ bool_t program_header( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
 
             /* Initialize the gen file */ 
-            if( TRUE != genCodeHeader(fpGenCode) )
+            if( TRUE != genCodeHeader() )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
