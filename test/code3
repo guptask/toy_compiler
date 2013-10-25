@@ -1,0 +1,7 @@
+program rTest is
+    string testStr;
+    integer num;
+    begin
+        getString(testStr, num);
+        putString(testStr);
+    end program

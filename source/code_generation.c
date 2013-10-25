@@ -3,12 +3,12 @@
 
 
 /* Macro section */
-#define NO_OF_HEADER_LINES        17
+#define NO_OF_HEADER_LINES        16
 #define NO_OF_TERMINATION_LINES   2
 #define NO_OF_GET_BOOL_LINES      4
 #define NO_OF_GET_INTEGER_LINES   4
 #define NO_OF_GET_FLOAT_LINES     5
-#define NO_OF_GET_STRING_LINES    6
+#define NO_OF_GET_STRING_LINES    7
 #define NO_OF_PUT_BOOL_LINES      4
 #define NO_OF_PUT_INTEGER_LINES   4
 #define NO_OF_PUT_FLOAT_LINES     4
@@ -33,7 +33,6 @@ unsigned int uiFramePtr = 0;
 
 /* Header details */
 static char arrcHeader[NO_OF_HEADER_LINES][LENGTH_OF_EACH_LINE] = {
-    "#include <stdio.h>\n",
     "#include \"run_time.h\"\n\n",
 
     "#define NUM_OF_REGISTERS 0xFF\n",
@@ -64,69 +63,70 @@ static char arrcTermination[NO_OF_TERMINATION_LINES][LENGTH_OF_EACH_LINE] = {
 
 /* getBool() definition */
 static char arrcGetBool[NO_OF_GET_BOOL_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = getBool();\n",
+    "    MM[SP+1] = R[0];\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* putBool() definition */
 static char arrcPutBool[NO_OF_PUT_BOOL_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = MM[SP+1];\n",
+    "    putBool(R[0]);\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* getInteger() definition */
 static char arrcGetInteger[NO_OF_GET_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = getBool();\n",
+    "    MM[SP+1] = R[0];\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* putInteger() definition */
 static char arrcPutInteger[NO_OF_PUT_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = MM[SP+1];\n",
+    "    putInteger(R[0]);\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* getFloat() definition */
 static char arrcGetFloat[NO_OF_GET_FLOAT_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    FLOAT_VAR = getFloat();\n",
+    "    memcpy( &R[0], &FLOAT_VAR, sizeof(float) );\n",
+    "    MM[SP+1] = R[0];\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* putFloat() definition */
 static char arrcPutFloat[NO_OF_PUT_FLOAT_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    memcpy( &FLOAT_VAR, &MM[SP+1], sizeof(float) );\n",
+    "    putFloat(FLOAT_VAR);\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* getString() definition */
 static char arrcGetString[NO_OF_GET_STRING_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = getString(CHAR_BUFFER);\n",
+    "    HP = HP - R[0];\n",
+    "    memcpy( &MM[HP], &CHAR_BUFFER, R[0]*sizeof(char) );\n",
+    "    MM[SP+1] = (int)((char *)&MM[HP]);\n",
+    "    MM[SP+2] = R[0];\n",
+    "    R[0] = MM[SP+3];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 /* putString() definition */
 static char arrcPutString[NO_OF_PUT_STRING_LINES][LENGTH_OF_EACH_LINE] = {
-    "    \n",
-    "    \n",
-    "    \n",
-    "    \n\n"
+    "    R[0] = MM[SP+1];\n",
+    "    putString( (char *)R[0]);\n",
+    "    R[0] = MM[SP+2];\n",
+    "    goto *(void *)R[0];\n\n"
 };
 
 
