@@ -852,6 +852,10 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
+            if( TRUE != writeProcCall(psToken) )
+            {
+                return FALSE;
+            }
             (void) stackPop();
         } break;
 

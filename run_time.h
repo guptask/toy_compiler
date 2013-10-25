@@ -33,7 +33,7 @@ void boolOpRuntimeChk( int iLeft, int iRight, unsigned int uiLineNum )
 int getInteger()
 {
     int iValue = 0;
-    printf("getInteger: ");
+    printf("Enter integer: ");
     scanf("%d", &iValue);
     return iValue;
 };
@@ -42,7 +42,7 @@ int getInteger()
 int getBool()
 {
     int iValue = 0;
-    printf("getBoolean: ");
+    printf("Enter boolean: ");
     scanf("%d", &iValue);
     while( (0 != iValue) && (1 != iValue) )
     {
@@ -56,7 +56,7 @@ int getBool()
 float getFloat()
 {
     float fValue = 0.0;
-    printf("getFloat: ");
+    printf("Enter float: ");
     scanf("%f", &fValue);
     return fValue;
 };
@@ -64,7 +64,7 @@ float getFloat()
 /* Get String */
 int getString( char *pcStr )
 {
-    printf("getString: ");
+    printf("Enter string: ");
     scanf("%[^\n]s", pcStr);
     return (strlen(pcStr)+1);
 };

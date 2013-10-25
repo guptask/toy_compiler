@@ -1131,4 +1131,33 @@ dataType_t evalExprTree()
     return eRetStatus;
 }
 
+/* API: Generate the code for procedure call */
+bool_t writeProcCall( tokenListEntry_t *psToken )
+{
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
+    /* Generate the code */
+    sprintf(arrcStr, "    MM[SP + %u] = (int)&&_return_from_%s_%p_;\n", 
+            psProcedure->uiReturnAddrDisp, psProcedure->pcProcName, psToken);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    arrcStr[0] = 0;
+    sprintf(arrcStr, "    goto _%p_%s_;\n\n", psProcedure, psProcedure->pcProcName);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    arrcStr[0] = 0;
+    sprintf(arrcStr, "_return_from_%s_%p_ :\n", psProcedure->pcProcName, psToken);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    return TRUE;
+}
 

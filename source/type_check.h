@@ -163,6 +163,9 @@ bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator );
 /* Evaluate the expression tree */
 dataType_t evalExprTree();
 
+/* Generate the code for procedure call */
+bool_t writeProcCall( tokenListEntry_t *psNode );
+
 
 #endif /* TYPE_CHECK_H_ */
 
