@@ -1,7 +1,7 @@
 program rTest is
     string testStr;
-    integer num;
+    integer num1;
     begin
-        getString(testStr, num);
+        getString(testStr, num1);
         putString(testStr);
     end program
