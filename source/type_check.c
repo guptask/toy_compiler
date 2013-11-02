@@ -521,7 +521,7 @@ bool_t fillProcName( tokenListEntry_t *psToken )
             return FALSE;
         }
         psTemp->pcProcName       = psToken->pcToken;
-        psTemp->ucVariableCnt       = 0;
+        psTemp->ucVariableCnt    = 0;
         psTemp->ucIntrnlProcCnt  = 0;
         psTemp->uiReturnAddrDisp = 0;
 
@@ -776,7 +776,11 @@ unsigned char fetchParamCnt()
         return -1;
     }
     for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
-                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++);
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++)
+    {
+        psProcedure->arrpsVariable[ucIndex]->uiCallStkDisp = ucIndex+1;
+    }
+    psProcedure->uiReturnAddrDisp = ucIndex+1;
     return ucIndex;
 }
 
