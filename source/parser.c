@@ -1004,6 +1004,10 @@ bool_t procedure_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'begin' reserved word missing on line no. %u.\n", psToken->uiLineNum);
                 return FALSE;
             }
+            if( TRUE != writeProcLabel() )
+            {
+                return FALSE;
+            }
         } break;
 
         case 3:

@@ -4,10 +4,14 @@
 
 /* Macro Section */
 #define MAX_EXPR_TREE_ARR_LEN 20
+#define MAX_GOTO_TAGS         20
 
 /* Static variable */
 static bool_t        bIsGlobalChain = FALSE;
 static unsigned char ucExpressionTreeCnt = 0;
+static unsigned int  uiArgNum = 0;
+static unsigned char ucGotoTagCount = 0;
+static char          arrcGotoTag[MAX_GOTO_TAGS][LENGTH_OF_EACH_LINE] = {{0}};
 static exprTree_t    *expressionTree[MAX_EXPR_TREE_ARR_LEN];
 static variable_t    *psVariable  = NULL;
 static procedure_t   *psProcedure = NULL;
@@ -478,24 +482,26 @@ bool_t fillParamType( tokenListEntry_t *psToken )
         printf("Internally something is wrong in variable addressing-3.\n");
         return FALSE;
     }
+
+    if( 0 == strcmp(psToken->pcToken, "in") )
+    {
+        psVariable->bIsParam    = TRUE;
+        psVariable->bIsOutParam = FALSE;
+    }
+    else if( 0 == strcmp(psToken->pcToken, "out") )
+    {
+        psVariable->bIsParam    = TRUE;
+        psVariable->bIsOutParam = TRUE;
+    }
     else
     {
-        if( 0 == strcmp(psToken->pcToken, "in") )
-        {
-            psVariable->bIsParam    = TRUE;
-            psVariable->bIsOutParam = FALSE;
-        }
-        else if( 0 == strcmp(psToken->pcToken, "out") )
-        {
-            psVariable->bIsParam    = TRUE;
-            psVariable->bIsOutParam = TRUE;
-        }
-        else
-        {
-            printf("Internally something is wrong in variable addressing-4.\n");
-            return FALSE;
-        }
+        printf("Internally something is wrong in variable addressing-4.\n");
+        return FALSE;
     }
+
+    psVariable->uiCallStkDisp     = ++uiArgNum;
+    psProcedure->uiReturnAddrDisp = uiArgNum + 1;
+
     return TRUE;
 }
 
@@ -505,7 +511,6 @@ bool_t fillProcName( tokenListEntry_t *psToken )
     procedure_t *psTemp = NULL, *psNode = NULL;
     unsigned int  uiNestCount = 0;
     unsigned char ucTempCount = 0;
-    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
 
     if(uiNestingLevel < 2)
     {
@@ -598,15 +603,13 @@ bool_t fillProcName( tokenListEntry_t *psToken )
                 }
             }
         }
+        psProcedure = psTemp;
+        uiArgNum = 0;
     }
 
-    /* Generate the goto tag */
-    sprintf(arrcStr, "_%p_%s_ :\n", psTemp, psToken->pcToken);
-    if( TRUE != genCodeInputString(arrcStr) )
-    {
-        bCodeGenErr = TRUE;
-        return FALSE;
-    }
+    /* Store the goto tag */
+    arrcGotoTag[ucGotoTagCount][0] = 0;
+    sprintf(arrcGotoTag[ucGotoTagCount++], "_%p_%s_ :\n", psTemp, psToken->pcToken);
 
     return TRUE;
 }
@@ -776,11 +779,7 @@ unsigned char fetchParamCnt()
         return -1;
     }
     for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
-                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++)
-    {
-        psProcedure->arrpsVariable[ucIndex]->uiCallStkDisp = ucIndex+1;
-    }
-    psProcedure->uiReturnAddrDisp = ucIndex+1;
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++);
     return ucIndex;
 }
 
@@ -1133,6 +1132,19 @@ dataType_t evalExprTree()
         printf("Error: Could not evaluate the expression.\n");
     }
     return eRetStatus;
+}
+
+/* API: Generate the code for procedure label */
+bool_t writeProcLabel()
+{
+    if( (!ucGotoTagCount) || (TRUE != genCodeInputString(arrcGotoTag[ucGotoTagCount-1])) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    ucGotoTagCount--;
+
+    return TRUE;
 }
 
 /* API: Generate the code for procedure call */
