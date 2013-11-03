@@ -1032,6 +1032,10 @@ bool_t procedure_body( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("'program' reserved word missing on line no. %u.\n'", psToken->uiLineNum);
                 return FALSE;
             }
+            if( TRUE != writeProcReturn() )
+            {
+                return FALSE;
+            }
             uiNestingLevel--;
         } break;
 

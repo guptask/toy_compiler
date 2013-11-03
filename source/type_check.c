@@ -1137,13 +1137,41 @@ dataType_t evalExprTree()
 /* API: Generate the code for procedure label */
 bool_t writeProcLabel()
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    unsigned char ucIndex = 1;
+
     if( (!ucGotoTagCount) || (TRUE != genCodeInputString(arrcGotoTag[ucGotoTagCount-1])) )
     {
         bCodeGenErr = TRUE;
         return FALSE;
     }
+    /* Re-populate the procedure location for use */
+    while( '_' != arrcGotoTag[ucGotoTagCount-1][ucIndex] )
+    {
+        arrcStr[ucIndex-1] = arrcGotoTag[ucGotoTagCount-1][ucIndex];
+        ucIndex++;
+    }
+    arrcStr[ucIndex-1] = 0;
+    psProcedure = (procedure_t *) strtol(arrcStr, NULL, 0);
+
     ucGotoTagCount--;
 
+    return TRUE;
+}
+
+/* API: Generate the code for procedure return */
+bool_t writeProcReturn()
+{
+    char arrcStr[2*LENGTH_OF_EACH_LINE] = {0};
+
+    /* Generate the code */
+    sprintf(arrcStr, "    R[0] = MM[SP+%u];\n    goto *(void *)R[0];\n\n",
+                                                psProcedure->uiReturnAddrDisp);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
     return TRUE;
 }
 

@@ -166,6 +166,9 @@ dataType_t evalExprTree();
 /* Generate the code for procedure label */
 bool_t writeProcLabel();
 
+/* Generate the code for procedure return */
+bool_t writeProcReturn();
+
 /* Generate the code for procedure call */
 bool_t writeProcCall( tokenListEntry_t *psNode );
 
