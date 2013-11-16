@@ -1,4 +1,4 @@
 COMPILE:
 	@echo Compiling using the following command:
-	gcc -Wall -Werror source/scanner.c source/parser.c source/type_check.c source/code_generation.c source/compiler.c -o compile
+	gcc -Wall -Werror src/scanner.c src/parser.c src/type_check.c src/code_generation.c src/compiler.c -o compile
 

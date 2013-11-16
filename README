@@ -4,7 +4,7 @@
 
 To build the compiler, type    :  make
 
-In the 'source' directory, to 
+In the 'src' directory, to 
 build the ctags links, type    :  ./make-ctags
 (needed only for code browsing)
 
