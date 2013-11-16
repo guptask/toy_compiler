@@ -13,7 +13,7 @@ fi
 #Create the top-level tags file using the absolute path.
 #The c-types option allows local variables to be tagged.
 #The fields options are required to use Pramod's go2definition gedit plugin
-ctags -R --c-types=+l --fields=ainSt ${PWD}
+ctags --exclude=${PWD}/test -R --c-types=+l --fields=ainSt ${PWD}
 
 #Create links in all sub-folders to the top-level tags file.
 #Do not create a link in . (this folder) - doing so will cause a loop.
@@ -22,6 +22,7 @@ ctags -R --c-types=+l --fields=ainSt ${PWD}
 #Use absolute paths everywhere so that tagged files can be edited 
 #from any folder.
 
-find . -type d \( -name \. -o \( -name \.git -prune \) -o \
+find . -type d \( \( -path ./test -prune \) -o \
+    -name \. -o \( -name \.git -prune \) -o \
     -exec rm -rf {}/tags \; \
     -exec ln -s ${PWD}/tags {}/tags \; \)

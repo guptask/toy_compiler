@@ -4,9 +4,8 @@
 
 To build the compiler, type    :  make
 
-In the 'src' directory, to 
-build the ctags links, type    :  ./make-ctags
-(needed only for code browsing)
+To build the ctags links, type :  ./make-ctags
+(for code browsing only)
 
 To test a sample code, type    : ./compile <code_sample>
 (code samples are present in 
@@ -15,8 +14,8 @@ To test a sample code, type    : ./compile <code_sample>
 Notes:
 -----
 
-1. 'code' and 'code2' are code samples present in the 'test' 
-   directory.
+1. 'code', 'code2', etc. are code samples present in the 
+   'test' directory.
 
 2. For special cases not mentioned in guidelines, C-type 
    rules have been followed eg. re-using of local variable 
