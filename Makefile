@@ -8,10 +8,10 @@ CODE_GEN = $(SRC)/code_generation.c
 COMPILER = $(SRC)/compiler.c
 
 SOURCES = $(SCANNER) \
-		  $(PARSER) \
-		  $(TYPE_CHK) \
-		  $(CODE_GEN) \
-		  $(COMPILER)
+          $(PARSER) \
+          $(TYPE_CHK) \
+          $(CODE_GEN) \
+          $(COMPILER)
 
 BINARY = compile
 
