@@ -1,4 +1,20 @@
-COMPILE:
-	@echo Compiling using the following command:
-	gcc -Wall -Werror src/scanner.c src/parser.c src/type_check.c src/code_generation.c src/compiler.c -o compile
+SRC = src
+CFLAGS = -Wall -Werror
+
+SCANNER  = $(SRC)/scanner.c
+PARSER   = $(SRC)/parser.c
+TYPE_CHK = $(SRC)/type_check.c
+CODE_GEN = $(SRC)/code_generation.c
+COMPILER = $(SRC)/compiler.c
+
+SOURCES = $(SCANNER) \
+		  $(PARSER) \
+		  $(TYPE_CHK) \
+		  $(CODE_GEN) \
+		  $(COMPILER)
+
+BINARY = compile
+
+$(BINARY): $(SOURCES)
+	@$(CC) $(CFLAGS) $(SOURCES) -o $@
 
