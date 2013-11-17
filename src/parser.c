@@ -1757,7 +1757,7 @@ bool_t parse( tokenListEntry_t *psTokenList )
     if( ('y' == cGenCodeCompile) || ('Y' == cGenCodeCompile) )
     {
         printf("'a.out' will be created on successful compilation.\n");
-        if( -1 == execl("/usr/bin/gcc", "gcc", pcGenFileName, NULL) )
+        if( -1 == execl("/usr/bin/gcc", "gcc", "-w", pcGenFileName, NULL) )
         {
             printf("Compilation of '%s' failed. Try manual compilation.\n", pcGenFileName);
         }
