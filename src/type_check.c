@@ -15,6 +15,7 @@ static char          arrcGotoTag[MAX_GOTO_TAGS][LENGTH_OF_EACH_LINE] = {{0}};
 static exprTree_t    *expressionTree[MAX_EXPR_TREE_ARR_LEN];
 static variable_t    *psVariable  = NULL;
 static procedure_t   *psProcedure = NULL;
+static unsigned char ucSPDisplacement = 0;
 
 /* API: Type check init */
 bool_t initTypeChecking()
@@ -54,9 +55,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* getBool(bool a out) */
     psProc = NULL;
@@ -83,9 +83,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* getFloat(float a out) */
     psProc = NULL;
@@ -112,9 +111,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* getString(string a in, integer b out) */
     psProc = NULL;
@@ -141,7 +139,7 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
 
     psVar = NULL;
     psVar = (variable_t *) malloc( sizeof(variable_t) );
@@ -156,10 +154,9 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
-    psVar->uiCallStkDisp     = 2;
+    psVar->ucCallStkDisp     = 1;
 
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 3;
 
     /* putInteger(integer a in) */
     psProc = (procedure_t *) malloc( sizeof(procedure_t) );
@@ -184,9 +181,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* putBool(bool a in) */
     psProc = NULL;
@@ -213,9 +209,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* putFloat(float a in) */
     psProc = NULL;
@@ -242,9 +237,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     /* putString(string a in) */
     psProc = NULL;
@@ -271,9 +265,8 @@ bool_t initTypeChecking()
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
-    psVar->uiCallStkDisp     = 1;
+    psVar->ucCallStkDisp     = 0;
     psProgram->arrpsGlobalProc[(psProgram->ucGlobalProcCnt)++] = psProc;
-    psProc->uiReturnAddrDisp = 2;
 
     return TRUE;
 }
@@ -309,7 +302,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
         psTemp->pcArrSize     = NULL;
         psTemp->bIsParam      = FALSE;
         psTemp->bIsOutParam   = FALSE;
-        psTemp->uiCallStkDisp = 0;
+        psTemp->ucCallStkDisp = 0;
 
         if(uiNestingLevel == 1)
         {
@@ -321,6 +314,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
             {
                 psProgram->arrpsLocalVar[psProgram->ucLocalVarCnt++] = psTemp;
             }
+            psTemp->ucCallStkDisp = psProgram->ucGlobalVarCnt + psProgram->ucLocalVarCnt - 1;
         }
         else
         {
@@ -346,6 +340,7 @@ bool_t fillVarType( tokenListEntry_t *psToken )
             }
 
             psNode->arrpsVariable[psNode->ucVariableCnt++] = psTemp;
+            psTemp->ucCallStkDisp = psNode->ucVariableCnt - 1;
         }
         psVariable = psTemp;
     }
@@ -499,9 +494,6 @@ bool_t fillParamType( tokenListEntry_t *psToken )
         return FALSE;
     }
 
-    psVariable->uiCallStkDisp     = ++uiArgNum;
-    psProcedure->uiReturnAddrDisp = uiArgNum + 1;
-
     return TRUE;
 }
 
@@ -528,7 +520,6 @@ bool_t fillProcName( tokenListEntry_t *psToken )
         psTemp->pcProcName       = psToken->pcToken;
         psTemp->ucVariableCnt    = 0;
         psTemp->ucIntrnlProcCnt  = 0;
-        psTemp->uiReturnAddrDisp = 0;
 
         if(uiNestingLevel == 2)
         {
@@ -868,6 +859,7 @@ bool_t authProc()
             {
                 bRetStatus = TRUE;
                 psProcedure = psProgram->arrpsLocalProc[ucTempCount];
+                ucSPDisplacement = psProgram->ucLocalVarCnt + psProgram->ucGlobalVarCnt + 1;
                 break;
             }
         }
@@ -903,6 +895,7 @@ bool_t authProc()
             {
                 bRetStatus = TRUE;
                 psProcedure = psProc->arrpsIntrnlProc[ucTempCount];
+                ucSPDisplacement = psProc->ucVariableCnt + 1;
                 break;
             }
         }
@@ -912,6 +905,7 @@ bool_t authProc()
         {
             bRetStatus = TRUE;
             psProcedure = psProc;
+            ucSPDisplacement = psProc->ucVariableCnt + 1;
         }
     }
 
@@ -922,6 +916,7 @@ bool_t authProc()
         {
             bRetStatus = TRUE;
             psProcedure = psProgram->arrpsGlobalProc[ucTempCount];
+            ucSPDisplacement = psProgram->ucLocalVarCnt + psProgram->ucGlobalVarCnt + 1;
         }
     }
 
@@ -1165,8 +1160,8 @@ bool_t writeProcReturn()
     char arrcStr[2*LENGTH_OF_EACH_LINE] = {0};
 
     /* Generate the code */
-    sprintf(arrcStr, "    R[0] = MM[SP+%u];\n    goto *(void *)R[0];\n\n",
-                                                psProcedure->uiReturnAddrDisp);
+    sprintf(arrcStr, "    R[0] = MM[SP+%d];\n    goto *(void *)R[0];\n\n",
+                                            (int)psProcedure->ucVariableCnt);
     if( TRUE != genCodeInputString(arrcStr) )
     {
         bCodeGenErr = TRUE;
@@ -1181,8 +1176,15 @@ bool_t writeProcCall( tokenListEntry_t *psToken )
     char arrcStr[LENGTH_OF_EACH_LINE] = {0};
 
     /* Generate the code */
-    sprintf(arrcStr, "    MM[SP + %u] = (int)&&_return_from_%s_%p_;\n", 
-            psProcedure->uiReturnAddrDisp, psProcedure->pcProcName, psToken);
+    sprintf(arrcStr, "    SP = SP + %d;\n", (int)ucSPDisplacement);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    arrcStr[0] = 0;
+    sprintf(arrcStr, "    MM[SP + %d] = (int)&&_return_from_%s_%p_;\n", 
+          (int)psProcedure->ucVariableCnt, psProcedure->pcProcName, psToken);
     if( TRUE != genCodeInputString(arrcStr) )
     {
         bCodeGenErr = TRUE;
@@ -1202,6 +1204,15 @@ bool_t writeProcCall( tokenListEntry_t *psToken )
         bCodeGenErr = TRUE;
         return FALSE;
     }
+    arrcStr[0] = 0;
+    sprintf(arrcStr, "    SP = SP - %d;\n", (int)ucSPDisplacement);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
+    ucSPDisplacement = 0;
+
     return TRUE;
 }
 

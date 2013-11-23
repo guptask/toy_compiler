@@ -64,32 +64,32 @@ static char arrcTermination[NO_OF_TERMINATION_LINES][LENGTH_OF_EACH_LINE] = {
 /* getBool() definition */
 static char arrcGetBool[NO_OF_GET_BOOL_LINES][LENGTH_OF_EACH_LINE] = {
     "    R[0] = getBool();\n",
-    "    MM[SP+1] = R[0];\n",
-    "    R[0] = MM[SP+2];\n",
+    "    MM[SP+0] = R[0];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
 /* putBool() definition */
 static char arrcPutBool[NO_OF_PUT_BOOL_LINES][LENGTH_OF_EACH_LINE] = {
-    "    R[0] = MM[SP+1];\n",
+    "    R[0] = MM[SP+0];\n",
     "    putBool(R[0]);\n",
-    "    R[0] = MM[SP+2];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
 /* getInteger() definition */
 static char arrcGetInteger[NO_OF_GET_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
     "    R[0] = getBool();\n",
-    "    MM[SP+1] = R[0];\n",
-    "    R[0] = MM[SP+2];\n",
+    "    MM[SP+0] = R[0];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
 /* putInteger() definition */
 static char arrcPutInteger[NO_OF_PUT_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
-    "    R[0] = MM[SP+1];\n",
+    "    R[0] = MM[SP+0];\n",
     "    putInteger(R[0]);\n",
-    "    R[0] = MM[SP+2];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
@@ -97,16 +97,16 @@ static char arrcPutInteger[NO_OF_PUT_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
 static char arrcGetFloat[NO_OF_GET_FLOAT_LINES][LENGTH_OF_EACH_LINE] = {
     "    FLOAT_VAR = getFloat();\n",
     "    memcpy( &R[0], &FLOAT_VAR, sizeof(float) );\n",
-    "    MM[SP+1] = R[0];\n",
-    "    R[0] = MM[SP+2];\n",
+    "    MM[SP+0] = R[0];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
 /* putFloat() definition */
 static char arrcPutFloat[NO_OF_PUT_FLOAT_LINES][LENGTH_OF_EACH_LINE] = {
-    "    memcpy( &FLOAT_VAR, &MM[SP+1], sizeof(float) );\n",
+    "    memcpy( &FLOAT_VAR, &MM[SP+0], sizeof(float) );\n",
     "    putFloat(FLOAT_VAR);\n",
-    "    R[0] = MM[SP+2];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
@@ -115,17 +115,17 @@ static char arrcGetString[NO_OF_GET_STRING_LINES][LENGTH_OF_EACH_LINE] = {
     "    R[0] = getString(CHAR_BUFFER);\n",
     "    HP = HP - R[0];\n",
     "    memcpy( &MM[HP], &CHAR_BUFFER, R[0]*sizeof(char) );\n",
-    "    MM[SP+1] = (int)((char *)&MM[HP]);\n",
-    "    MM[SP+2] = R[0];\n",
-    "    R[0] = MM[SP+3];\n",
+    "    MM[SP+0] = (int)((char *)&MM[HP]);\n",
+    "    MM[SP+1] = R[0];\n",
+    "    R[0] = MM[SP+2];\n",
     "    goto *(void *)R[0];\n\n"
 };
 
 /* putString() definition */
 static char arrcPutString[NO_OF_PUT_STRING_LINES][LENGTH_OF_EACH_LINE] = {
-    "    R[0] = MM[SP+1];\n",
+    "    R[0] = MM[SP+0];\n",
     "    putString( (char *)R[0]);\n",
-    "    R[0] = MM[SP+2];\n",
+    "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
 };
 

@@ -1,3 +1,4 @@
+CC = gcc
 SRC = src
 CFLAGS = -Wall -Werror
 

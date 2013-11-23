@@ -22,6 +22,7 @@
 #define MAX_EXPR_OPERATOR_CNT 40
 #define MAX_EXPR_OPERAND_CNT  80
 #define EXPR_DEBUG_FLAG       0
+#define MAX_EXPR_NEST_CNT     80
 
 
 /* Enumeration section */
@@ -46,7 +47,7 @@ typedef struct variable_s
     char                *pcArrSize;
     bool_t              bIsParam;
     bool_t              bIsOutParam;
-    unsigned int        uiCallStkDisp;
+    unsigned char       ucCallStkDisp;
 
 } variable_t;
 
@@ -58,7 +59,6 @@ typedef struct procedure_s
     variable_t          *arrpsVariable[MAX_PROC_PARAM_CNT];
     unsigned char       ucIntrnlProcCnt;
     struct procedure_s  *arrpsIntrnlProc[MAX_INTRNL_PROC_CNT];
-    unsigned int        uiReturnAddrDisp;
 
 } procedure_t;
 

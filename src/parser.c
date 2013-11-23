@@ -71,6 +71,10 @@ static dataType_t eExprEval        = UNDEFINED_TYPE;
 static dataType_t eAssignStatement = UNDEFINED_TYPE;
 static unsigned char ucArgCnt      = 0;
 
+/* Code generation variable */
+static bool_t       arrcBUnaryNegative[MAX_EXPR_NEST_CNT] = {FALSE};
+static unsigned int uiExprNestingCnt                      = 0;
+
 
 /* Definition section */
 
@@ -284,6 +288,9 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 */
 bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0}, arrcTemp[LENGTH_OF_EACH_LINE] = {0};
+    unsigned int uiIndex = 0;
+
     switch( sStack[uiTop-1].uiCount )
     {
         case 1:
@@ -295,6 +302,15 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+
+                /* Generate the code */
+                sprintf(arrcStr, "    R[%u] = %s;\n", ++uiRegCount, psToken->pcToken);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+
                 (void) stackPop();
             }
             else if( STRING == getTokenTypeFromTokTab(psToken) )
@@ -303,6 +319,34 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+
+                /* Generate the code */
+                /* Remove the quotes from the string */
+                for( uiIndex = 1; uiIndex < strlen(psToken->pcToken)-1; uiIndex++ )
+                {
+                    arrcTemp[uiIndex-1] = psToken->pcToken[uiIndex];
+                }
+                arrcTemp[uiIndex] = '\0';
+
+                sprintf(arrcStr, "    HP = HP - %u;\n", (unsigned int)(strlen(arrcTemp)+1));
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+                sprintf(arrcStr, "    memcpy( &MM[HP], %s, %u );\n", psToken->pcToken, (unsigned int)(strlen(arrcTemp)+1) );
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+                sprintf(arrcStr, "    R[%u] = (int)((char *)&MM[HP]);\n", ++uiRegCount);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+
                 (void) stackPop();
             }
             else if(0 == strcmp(psToken->pcToken, "("))
@@ -314,6 +358,7 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 if(0 != strcmp(psToken->pcToken, "-"))
                 {
                     *bIsTokIncrNeeded = FALSE;
+                    arrcBUnaryNegative[uiExprNestingCnt++] = FALSE;
                 }
                 else
                 {
@@ -321,6 +366,7 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         return FALSE;
                     }
+                    arrcBUnaryNegative[uiExprNestingCnt++] = TRUE;
                 }
             }
         } break;
