@@ -198,6 +198,10 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 return FALSE;
             }
             ucArgCnt--;
+            if( TRUE != writeProcArgs( (unsigned char)(((sStack[uiTop-1].uiCount)/2))-1) )
+            {
+                return FALSE;
+            }
             if(0 != strcmp(psToken->pcToken, ","))
             {
                 *bIsTokIncrNeeded = FALSE;
@@ -395,6 +399,22 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         return FALSE;
                     }
+
+                    /* Generate the code */
+                    if( TRUE == arrcBUnaryNegative[uiExprNestingCnt-1] )
+                    {
+                        sprintf(arrcStr, "    R[%u] = -%s;\n", ++uiRegCount, psToken->pcToken);
+                    }
+                    else
+                    {
+                        sprintf(arrcStr, "    R[%u] = %s;\n", ++uiRegCount, psToken->pcToken);
+                    }
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                    uiExprNestingCnt--;
                 }
                 else /* When number is float */
                 {
@@ -402,6 +422,28 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         return FALSE;
                     }
+
+                    /* Generate the code */
+                    if( TRUE == arrcBUnaryNegative[uiExprNestingCnt-1] )
+                    {
+                        sprintf(arrcStr, "    FLOAT_VAR = -%s;\n", psToken->pcToken);
+                    }
+                    else
+                    {
+                        sprintf(arrcStr, "    FLOAT_VAR = %s;\n", psToken->pcToken);
+                    }
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                    sprintf(arrcStr, "    memcpy( &R[%u], &FLOAT_VAR, sizeof(float) );\n", ++uiRegCount);
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                    uiExprNestingCnt--;
                 }
                 (void) stackPop();
             }
