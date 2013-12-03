@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -c -Wall -Werror -I$(SRC)
+CFLAGS= -c -Wall -Werror
 LDFLAGS=
 SRC= src
 SOURCES= $(wildcard $(SRC)/*.c)
@@ -11,12 +11,12 @@ EXECUTABLE = compile
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 %.o: $(SRC)/%.c $(INCLUDIR)
-	$(CC) $(CFLAGS) $< -o $@
+	@$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(EXECUTABLE) *.o
+	@rm -f $(EXECUTABLE) *.o
 
 .PHONY: all clean
