@@ -1,21 +1,22 @@
-CC = gcc
-SRC = src
-CFLAGS = -Wall -Werror
+CC= gcc
+CFLAGS= -c -Wall -Werror -I$(SRC)
+LDFLAGS=
+SRC= src
+SOURCES= $(wildcard $(SRC)/*.c)
+INCLUDIR= $(wildcard $(SRC)/*.h)
+OBJECTS= $(join $(addsuffix ../, $(dir $(SOURCES))), $(notdir $(SOURCES:.c=.o)))
 
-SCANNER  = $(SRC)/scanner.c
-PARSER   = $(SRC)/parser.c
-TYPE_CHK = $(SRC)/type_check.c
-CODE_GEN = $(SRC)/code_generation.c
-COMPILER = $(SRC)/compiler.c
+EXECUTABLE = compile
 
-SOURCES = $(SCANNER) \
-          $(PARSER) \
-          $(TYPE_CHK) \
-          $(CODE_GEN) \
-          $(COMPILER)
+all: $(SOURCES) $(EXECUTABLE)
 
-BINARY = compile
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-$(BINARY): $(SOURCES)
-	@$(CC) $(CFLAGS) $(SOURCES) -o $@
+%.o: $(SRC)/%.c $(INCLUDIR)
+	$(CC) $(CFLAGS) $< -o $@
 
+clean:
+	rm -f $(EXECUTABLE) *.o
+
+.PHONY: all clean
