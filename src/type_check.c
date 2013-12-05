@@ -139,7 +139,7 @@ bool_t initTypeChecking()
     psVar->eDataType         = STRING_TYPE;
     psVar->pcArrSize         = NULL;
     psVar->bIsParam          = TRUE;
-    psVar->bIsOutParam       = FALSE;
+    psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 0;
 
     psVar = NULL;
@@ -1191,11 +1191,19 @@ bool_t writeProcArgs( unsigned char ucArgSPDisp )
         }
         bIsSPChangeNeeded = FALSE;
     }
-    sprintf(arrcStr, "    MM[SP + %d] = R[%u];\n", (int)ucArgSPDisp, uiRegCount);
-    if( TRUE != genCodeInputString(arrcStr) )
+
+    /* If argument is an 'in' parameter */
+    if( TRUE != psProcedure->arrpsVariable[ucArgSPDisp]->bIsOutParam )
     {
-        bCodeGenErr = TRUE;
-        return FALSE;
+        sprintf(arrcStr, "    MM[SP + %d] = R[%u];\n", (int)ucArgSPDisp, uiRegCount);
+        if( TRUE != genCodeInputString(arrcStr) )
+        {
+            bCodeGenErr = TRUE;
+            return FALSE;
+        }
+    }
+    else /* when argument is an out paramter */
+    {
     }
 
     return TRUE;
