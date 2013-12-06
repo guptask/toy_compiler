@@ -970,86 +970,161 @@ bool_t destroyExprTree()
 /* API: Populate the expression tree operand */
 bool_t popuExprTreeOperand( dataType_t eOperand )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    bool_t bIsFirstArgFloat = FALSE, bIsSecondArgFloat = FALSE;
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
+    unsigned char ucIndex = 0;
+
     if( MAX_EXPR_OPERAND_CNT <= eTree->ucOperandStkTop )
     {
         printf("Exceeded the max no. of operands supported per expression.\n");
         return FALSE;
     }
-    eTree->arreOperandStk[(eTree->ucOperandStkTop)++] = eOperand;
+    eTree->arreOperandStk[eTree->ucOperandStkTop] = eOperand;
+    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop] = uiRegCount;
+    (eTree->ucOperandStkTop)++;
+
+    if(EXPR_DEBUG_FLAG)
+    {
+        printf("Before prelim computation\nOperator stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; ucIndex++)
+        {
+            printf("%s ,", eTree->arrpcOperatorStk[ucIndex]);
+        }
+        printf("\nOperand stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperandStkTop; ucIndex++)
+        {
+            printf("%d ,", eTree->arreOperandStk[ucIndex]);
+        }
+        printf("\n");
+    }
 
     /* Start evaluation */
-    while(eTree->ucOperatorStkTop)
+    /* Check for unary operator */
+    while( (eTree->ucOperatorStkTop) && (TRUE == eTree->arrbOperatorType[eTree->ucOperatorStkTop-1]) )
     {
-        /* Check for unary operator */
-        if( TRUE == eTree->arrbOperatorType[eTree->ucOperatorStkTop-1] )
+        if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-") )
         {
-            if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-") )
+            if( !(eOperand & (INTEGER_TYPE+FLOAT_TYPE)) )
             {
-                if( !(eOperand & (INTEGER_TYPE+FLOAT_TYPE)) )
-                {
-                    printf( "Error: Unary operator '-' supports integer or float only.\n");
-                    return FALSE;
-                }
-            }
-            else if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "not") )
-            {
-                if( !(eOperand & (INTEGER_TYPE+BOOL_TYPE)) )
-                {
-                    printf( "Error: Unary operator 'not' supports integer or boolean only.\n");
-                    return FALSE;
-                }
-            }
-            else
-            {
-                printf( "Error: Invalid unary operator '%s'.\n", 
-                        eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
+                printf( "Error: Unary operator '-' supports integer or float only.\n");
                 return FALSE;
             }
-            (eTree->ucOperatorStkTop)--;
         }
-        else /* binary operator */
+        else if( 0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "not") )
         {
-            if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "*")) ||
-                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "/")) ||
-                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "+")) ||
-                (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "-"))   )
+            if( !(eOperand & (INTEGER_TYPE+BOOL_TYPE)) )
             {
-                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) ||
-                    (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
-                {
-                    printf( "Error: Arithmetic operator '%s' supports integer or float only.\n",
+                printf( "Error: Unary operator 'not' supports integer or boolean only.\n");
+                return FALSE;
+            }
+
+            sprintf(arrcStr, "    R[%u] = !R[%u];\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-1], 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-1]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+        }
+        else
+        {
+            printf( "Error: Invalid unary operator '%s'.\n", 
+                        eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
+            return FALSE;
+        }
+        (eTree->ucOperatorStkTop)--;
+    }
+
+    /* binary operators '*' and '/' */
+    while( (eTree->ucOperatorStkTop) && 
+           ( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "*")) || 
+             (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "/"))
+           )
+         )
+    {
+        if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+FLOAT_TYPE))) ||
+            (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+FLOAT_TYPE)))   )
+        {
+            printf( "Error: Arithmetic operator '%s' supports integer or float only.\n",
                                         eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
-                    return FALSE;
-                }
-                (eTree->ucOperandStkTop)--;
-                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = 
+            return FALSE;
+        }
+
+        /* Generate the code */
+        if( (eTree->arreOperandStk[eTree->ucOperandStkTop-2]) & FLOAT_TYPE )
+        {
+            bIsFirstArgFloat = TRUE;
+            sprintf(arrcStr, "    memcpy( &FLOAT_VAR, &R[%u], sizeof(float) );\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-2]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+        }
+        if( (eTree->arreOperandStk[eTree->ucOperandStkTop-1]) & FLOAT_TYPE )
+        {
+            bIsSecondArgFloat = TRUE;
+            sprintf(arrcStr, "    memcpy( &FLOAT_VAR1, &R[%u], sizeof(float) );\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-1]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+        }
+        if( (TRUE == bIsFirstArgFloat) && (FALSE == bIsSecondArgFloat) )
+        {
+            sprintf(arrcStr, "    FLOAT_VAR = FLOAT_VAR %s R[%u];\n", 
+                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1],
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-1]);
+        }
+        else if( (FALSE == bIsFirstArgFloat) && (TRUE == bIsSecondArgFloat) )
+        {
+            sprintf(arrcStr, "    FLOAT_VAR = R[%u] %s FLOAT_VAR1;\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-2], 
+                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1]);
+        }
+        else if( (TRUE == bIsFirstArgFloat) && (TRUE == bIsSecondArgFloat) )
+        {
+            sprintf(arrcStr, "    FLOAT_VAR = FLOAT_VAR %s FLOAT_VAR1;\n", 
+                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1]);
+        }
+        else
+        {
+            sprintf(arrcStr, "    R[%u] = R[%u] %s R[%u];\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-2], 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-2],
+                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1],
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-1]);
+        }
+        if( TRUE != genCodeInputString(arrcStr) )
+        {
+            bCodeGenErr = TRUE;
+            return FALSE;
+        }
+
+        if( (TRUE == bIsFirstArgFloat) || (TRUE == bIsSecondArgFloat) )
+        {
+            sprintf(arrcStr, "    memcpy( &R[%u], &FLOAT_VAR, sizeof(float) );\n", 
+                    eTree->arruiOperandRegCnt[eTree->ucOperandStkTop-2]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+            bIsFirstArgFloat  = FALSE;
+            bIsSecondArgFloat = FALSE;
+        }
+
+        eTree->arreOperandStk[eTree->ucOperandStkTop-2] = 
                         ( eTree->arreOperandStk[eTree->ucOperandStkTop-1] | 
                           eTree->arreOperandStk[eTree->ucOperandStkTop-2]  ) & 
                         (INTEGER_TYPE+FLOAT_TYPE);
-                (eTree->ucOperatorStkTop)--;
-            }
-            else if( (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "&")) ||
-                     (0 == strcmp(eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1], "|"))   )
-            {
-                if( (!(eTree->arreOperandStk[eTree->ucOperandStkTop-1] & (INTEGER_TYPE+BOOL_TYPE))) ||
-                    (!(eTree->arreOperandStk[eTree->ucOperandStkTop-2] & (INTEGER_TYPE+BOOL_TYPE)))   )
-                {
-                    printf( "Error: Bitwise/logical operator '%s' supports integer or float only.\n",
-                                                    eTree->arrpcOperatorStk[eTree->ucOperatorStkTop-1] );
-                    return FALSE;
-                }
-                (eTree->ucOperandStkTop)--;
-                eTree->arreOperandStk[eTree->ucOperandStkTop-1] = 
-                        eTree->arreOperandStk[eTree->ucOperandStkTop-1] | 
-                        eTree->arreOperandStk[eTree->ucOperandStkTop-2];
-                (eTree->ucOperatorStkTop)--;
-            }
-            else
-            {
-                break;
-            }
-        }
+        (eTree->ucOperandStkTop)--;
+        (eTree->ucOperatorStkTop)--;
     }
 
     return TRUE;
@@ -1071,11 +1146,13 @@ bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator )
 }
 
 /* API: Evaluate the expression tree */
-dataType_t evalExprTree()
+dataType_t evalExprTree( unsigned int *puiRegCount )
 {
     dataType_t eRetStatus = UNDEFINED_TYPE;
     exprTree_t *eTree = expressionTree[ucExpressionTreeCnt-1];
-    unsigned char ucIndex = 0;
+    unsigned char ucIndex = 0, ucTempIndex = 0;
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    bool_t bIsFirstArgFloat = FALSE, bIsSecondArgFloat = FALSE;
 
     /* If no computation is required */
     if( !eTree->ucOperatorStkTop )
@@ -1084,52 +1161,266 @@ dataType_t evalExprTree()
         {
             eTree->ucOperandStkTop = 0;
             eRetStatus = eTree->arreOperandStk[0];
+            *puiRegCount = eTree->arruiOperandRegCnt[0];
         }
         else
         {
             printf("5.This error should not occur.\n");
         }
+        return eRetStatus;
     }
-    else /* computation is required */
-    {
-        /* No. of operands should be 1 more than No. of operators */
-        if( 1 == eTree->ucOperandStkTop - eTree->ucOperatorStkTop )
-        {
-            for( ucIndex = eTree->ucOperatorStkTop-1; 
-                    ucIndex < eTree->ucOperatorStkTop; ucIndex-- )
-            {
-                if( (!strcmp(eTree->arrpcOperatorStk[ucIndex],  "<")) &&
-                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "<=")) &&
-                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "==")) &&
-                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], "!=")) &&
-                    (!strcmp(eTree->arrpcOperatorStk[ucIndex], ">=")) &&
-                    (!strcmp(eTree->arrpcOperatorStk[ucIndex],  ">"))   )
-                {
-                    printf("6.This error should not occur.\n");
-                    break;
-                }
 
-                if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+FLOAT_TYPE+BOOL_TYPE))) ||
-                    (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+FLOAT_TYPE+BOOL_TYPE)))   )
-                {
-                    printf( "Error: Relational operator '%s' supports integer or bool only.\n",
-                                                                eTree->arrpcOperatorStk[ucIndex] );
-                    break;
-                }
-                eRetStatus = BOOL_TYPE;
-                (eTree->ucOperandStkTop)--;
-            }
-            eTree->ucOperatorStkTop = 0;
-        }
-        else /* Operator to operand matching gone wrong */
+    /* No. of operands should be 1 more than No. of operators */
+    if( 1 != eTree->ucOperandStkTop - eTree->ucOperatorStkTop )
+    {
+        printf("6.This error should not occur.\n");
+        return UNDEFINED_TYPE;
+    }
+
+    if(EXPR_DEBUG_FLAG)
+    {
+        printf("Before evaluation\nOperator stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; ucIndex++)
         {
-            printf("7.This error should not occur.\n");
+            printf("%s ,", eTree->arrpcOperatorStk[ucIndex]);
+        }
+        printf("\nOperand stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperandStkTop; ucIndex++)
+        {
+            printf("%d ,", eTree->arreOperandStk[ucIndex]);
+        }
+        printf("\n");
+    }
+
+    for( ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; )
+    {
+        /* binary operators '+' and '-' */
+        if( (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "+")) || 
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "-"))    )
+        {
+            if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+FLOAT_TYPE))) ||
+                (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+FLOAT_TYPE)))   )
+            {
+                printf( "Error: Arithmetic operator '%s' supports integer or float only.\n",
+                                        eTree->arrpcOperatorStk[ucIndex] );
+                return UNDEFINED_TYPE;
+            }
+
+            /* Generate the code */
+            if( (eTree->arreOperandStk[ucIndex]) & FLOAT_TYPE )
+            {
+                bIsFirstArgFloat = TRUE;
+                sprintf(arrcStr, "    memcpy( &FLOAT_VAR, &R[%u], sizeof(float) );\n", 
+                                eTree->arruiOperandRegCnt[ucIndex]);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+            }
+            if( (eTree->arreOperandStk[ucIndex+1]) & FLOAT_TYPE )
+            {
+                bIsSecondArgFloat = TRUE;
+                sprintf(arrcStr, "    memcpy( &FLOAT_VAR1, &R[%u], sizeof(float) );\n", 
+                                eTree->arruiOperandRegCnt[ucIndex+1]);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+            }
+            if( (TRUE == bIsFirstArgFloat) && (FALSE == bIsSecondArgFloat) )
+            {
+                sprintf(arrcStr, "    FLOAT_VAR = FLOAT_VAR %s R[%u];\n", 
+                                        eTree->arrpcOperatorStk[ucIndex],
+                                        eTree->arruiOperandRegCnt[ucIndex+1]);
+            }
+            else if( (FALSE == bIsFirstArgFloat) && (TRUE == bIsSecondArgFloat) )
+            {
+                sprintf(arrcStr, "    FLOAT_VAR = R[%u] %s FLOAT_VAR1;\n", 
+                                        eTree->arruiOperandRegCnt[ucIndex], 
+                                        eTree->arrpcOperatorStk[ucIndex]);
+            }
+            else if( (TRUE == bIsFirstArgFloat) && (TRUE == bIsSecondArgFloat) )
+            {
+                sprintf(arrcStr, "    FLOAT_VAR = FLOAT_VAR %s FLOAT_VAR1;\n", 
+                                        eTree->arrpcOperatorStk[ucIndex]);
+            }
+            else
+            {
+                sprintf(arrcStr, "    R[%u] = R[%u] %s R[%u];\n", 
+                                        eTree->arruiOperandRegCnt[ucIndex], 
+                                        eTree->arruiOperandRegCnt[ucIndex],
+                                        eTree->arrpcOperatorStk[ucIndex],
+                                        eTree->arruiOperandRegCnt[ucIndex+1]);
+            }
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            if( (TRUE == bIsFirstArgFloat) || (TRUE == bIsSecondArgFloat) )
+            {
+                sprintf(arrcStr, "    memcpy( &R[%u], &FLOAT_VAR, sizeof(float) );\n", 
+                                        eTree->arruiOperandRegCnt[ucIndex]);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+                bIsFirstArgFloat  = FALSE;
+                bIsSecondArgFloat = FALSE;
+            }
+
+            eTree->arreOperandStk[ucIndex] = 
+                        ( eTree->arreOperandStk[ucIndex] | eTree->arreOperandStk[ucIndex+1]  ) & 
+                        (INTEGER_TYPE+FLOAT_TYPE);
+            for(ucTempIndex = ucIndex+2; ucTempIndex < eTree->ucOperandStkTop; ucTempIndex++)
+            {
+                eTree->arreOperandStk[ucTempIndex-1] = eTree->arreOperandStk[ucTempIndex];
+                eTree->arruiOperandRegCnt[ucTempIndex-1] = eTree->arruiOperandRegCnt[ucTempIndex];
+            }
+            (eTree->ucOperandStkTop)--;
+            for(ucTempIndex = ucIndex+1; ucTempIndex < eTree->ucOperatorStkTop; ucTempIndex++)
+            {
+                eTree->arrpcOperatorStk[ucTempIndex-1] = eTree->arrpcOperatorStk[ucTempIndex];
+                eTree->arrbOperatorType[ucTempIndex-1] = eTree->arrbOperatorType[ucTempIndex];
+            }
+            (eTree->ucOperatorStkTop)--;
+        }
+        else
+        {
+            ucIndex++;
         }
     }
+
+    for( ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; )
+    {
+        /* relational operators '<',..,'>' */
+        if( (0 == strcmp(eTree->arrpcOperatorStk[ucIndex],  "<")) || 
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "<=")) ||   
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "==")) ||   
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "!=")) ||   
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], ">=")) ||   
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex],  ">"))   )
+        {
+            if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+BOOL_TYPE))) ||
+                (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+BOOL_TYPE)))   )
+            {
+                printf( "Error: Relational operator '%s' supports integer or boolean only.\n",
+                                        eTree->arrpcOperatorStk[ucIndex] );
+                return UNDEFINED_TYPE;
+            }
+
+            /* Generate the code */
+            sprintf(arrcStr, "    R[%u] = R[%u] %s R[%u];\n", 
+                                    eTree->arruiOperandRegCnt[ucIndex], 
+                                    eTree->arruiOperandRegCnt[ucIndex],
+                                    eTree->arrpcOperatorStk[ucIndex],
+                                    eTree->arruiOperandRegCnt[ucIndex+1]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            eTree->arreOperandStk[ucIndex] = BOOL_TYPE;
+            for(ucTempIndex = ucIndex+2; ucTempIndex < eTree->ucOperandStkTop; ucTempIndex++)
+            {
+                eTree->arreOperandStk[ucTempIndex-1] = eTree->arreOperandStk[ucTempIndex];
+                eTree->arruiOperandRegCnt[ucTempIndex-1] = eTree->arruiOperandRegCnt[ucTempIndex];
+            }
+            (eTree->ucOperandStkTop)--;
+            for(ucTempIndex = ucIndex+1; ucTempIndex < eTree->ucOperatorStkTop; ucTempIndex++)
+            {
+                eTree->arrpcOperatorStk[ucTempIndex-1] = eTree->arrpcOperatorStk[ucTempIndex];
+                eTree->arrbOperatorType[ucTempIndex-1] = eTree->arrbOperatorType[ucTempIndex];
+            }
+            (eTree->ucOperatorStkTop)--;
+        }
+        else
+        {
+            ucIndex++;
+        }
+    }
+
+    for( ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; )
+    {
+        /* boolean operators '&' and '|' */
+        if( (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "&")) || 
+            (0 == strcmp(eTree->arrpcOperatorStk[ucIndex], "|"))   )
+        {
+            if( (!(eTree->arreOperandStk[ucIndex]   & (INTEGER_TYPE+BOOL_TYPE))) ||
+                (!(eTree->arreOperandStk[ucIndex+1] & (INTEGER_TYPE+BOOL_TYPE)))   )
+            {
+                printf( "Error: Boolean operator '%s' supports integer or boolean only.\n",
+                                        eTree->arrpcOperatorStk[ucIndex] );
+                return UNDEFINED_TYPE;
+            }
+
+            /* Generate the code */
+            sprintf(arrcStr, "    R[%u] = R[%u] %s R[%u];\n", 
+                                    eTree->arruiOperandRegCnt[ucIndex], 
+                                    eTree->arruiOperandRegCnt[ucIndex],
+                                    eTree->arrpcOperatorStk[ucIndex],
+                                    eTree->arruiOperandRegCnt[ucIndex+1]);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            eTree->arreOperandStk[ucIndex] = 
+                        ( eTree->arreOperandStk[ucIndex] | eTree->arreOperandStk[ucIndex+1]  ) & 
+                        (INTEGER_TYPE+BOOL_TYPE);
+            for(ucTempIndex = ucIndex+2; ucTempIndex < eTree->ucOperandStkTop; ucTempIndex++)
+            {
+                eTree->arreOperandStk[ucTempIndex-1] = eTree->arreOperandStk[ucTempIndex];
+                eTree->arruiOperandRegCnt[ucTempIndex-1] = eTree->arruiOperandRegCnt[ucTempIndex];
+            }
+            (eTree->ucOperandStkTop)--;
+            for(ucTempIndex = ucIndex+1; ucTempIndex < eTree->ucOperatorStkTop; ucTempIndex++)
+            {
+                eTree->arrpcOperatorStk[ucTempIndex-1] = eTree->arrpcOperatorStk[ucTempIndex];
+                eTree->arrbOperatorType[ucTempIndex-1] = eTree->arrbOperatorType[ucTempIndex];
+            }
+            (eTree->ucOperatorStkTop)--;
+        }
+        else
+        {
+            ucIndex++;
+        }
+    }
+
+    if(EXPR_DEBUG_FLAG)
+    {
+        printf("After evaluation\nOperator stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperatorStkTop; ucIndex++)
+        {
+            printf("%s ,", eTree->arrpcOperatorStk[ucIndex]);
+        }
+        printf("\nOperand stack:\n");
+        for(ucIndex = 0; ucIndex < eTree->ucOperandStkTop; ucIndex++)
+        {
+            printf("%d ,", eTree->arreOperandStk[ucIndex]);
+        }
+        printf("\n");
+    }
+
+    if( (eTree->ucOperatorStkTop) || (eTree->ucOperandStkTop != 1) )
+    {
+        printf("Error: Could not evaluate the expression.\n");
+        return UNDEFINED_TYPE;
+    }
+
+    eRetStatus = eTree->arreOperandStk[0];
+    *puiRegCount = eTree->arruiOperandRegCnt[0];
+    eTree->ucOperatorStkTop = 0;
 
     if( UNDEFINED_TYPE == eRetStatus )
     {
-        printf("Error: Could not evaluate the expression.\n");
+        printf("Error: Incorrect evaluation of the expression.\n");
     }
     return eRetStatus;
 }

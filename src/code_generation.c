@@ -3,7 +3,7 @@
 
 
 /* Macro section */
-#define NO_OF_HEADER_LINES        16
+#define NO_OF_HEADER_LINES        17
 #define NO_OF_TERMINATION_LINES   2
 #define NO_OF_GET_BOOL_LINES      4
 #define NO_OF_GET_INTEGER_LINES   4
@@ -44,7 +44,8 @@ static char arrcHeader[NO_OF_HEADER_LINES][LENGTH_OF_EACH_LINE] = {
     "int   R[NUM_OF_REGISTERS]           = {0};\n",
     "int   MM[MM_SIZE]                   = {0};\n",
     "char  CHAR_BUFFER[CHAR_BUFFER_SIZE] = {0};\n",
-    "float FLOAT_VAR                     = 0.0;\n\n",
+    "float FLOAT_VAR                     = 0.0;\n",
+    "float FLOAT_VAR1                    = 0.0;\n\n",
 
     "/* Stack pointer */\n",
     "int SP = 0;\n",

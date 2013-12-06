@@ -82,6 +82,7 @@ typedef struct exprTree_s
 {
     unsigned char ucOperandStkTop;
     dataType_t arreOperandStk[MAX_EXPR_OPERAND_CNT];
+    unsigned int arruiOperandRegCnt[MAX_EXPR_OPERAND_CNT];
     unsigned char ucOperatorStkTop;
     char *arrpcOperatorStk[MAX_EXPR_OPERATOR_CNT];
     bool_t arrbOperatorType[MAX_EXPR_OPERATOR_CNT];
@@ -161,7 +162,7 @@ bool_t popuExprTreeOperand( dataType_t eOperand );
 bool_t popuExprTreeOperator( char *pcOperator, bool_t bIsUnaryOperator );
 
 /* Evaluate the expression tree */
-dataType_t evalExprTree();
+dataType_t evalExprTree( unsigned int *puiRegCount );
 
 /* Generate the code for procedure label */
 bool_t writeProcLabel();

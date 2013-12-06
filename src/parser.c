@@ -65,15 +65,15 @@ static parserState_t eParserState        = PROGRAM;
 static stackState_t  sStack[STACK_SIZE];
 static unsigned int  uiTop               = 0;
 
-/* Type checking variable */
+/* Type checking variables */
 static bool_t     bIsTypeCheckSucc = TRUE;
 static dataType_t eExprEval        = UNDEFINED_TYPE;
+static unsigned int uiExprEvalReg  = 0;
 static dataType_t eAssignStatement = UNDEFINED_TYPE;
 static unsigned char ucArgCnt      = 0;
 
-/* Code generation variable */
-static bool_t       arrcBUnaryNegative[MAX_EXPR_NEST_CNT] = {FALSE};
-static unsigned int uiExprNestingCnt                      = 0;
+/* Code generation variables */
+bool_t bIsUnaryNegative            = FALSE;
 
 
 /* Definition section */
@@ -177,9 +177,6 @@ bool_t numbers( tokenListEntry_t *psToken )
         //printf("'%s' not a number.\n", psToken->pcToken);
         return FALSE;
     }
-
-    (void) stackPop();
-
     return TRUE;
 }
 
@@ -302,11 +299,6 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             if( (0 == strcmp(psToken->pcToken, "true" )) |
                 (0 == strcmp(psToken->pcToken, "false"))  )
             {
-                if( TRUE != popuExprTreeOperand(BOOL_TYPE) )
-                {
-                    return FALSE;
-                }
-
                 /* Generate the code */
                 sprintf(arrcStr, "    R[%u] = %s;\n", ++uiRegCount, psToken->pcToken);
                 if( TRUE != genCodeInputString(arrcStr) )
@@ -315,15 +307,15 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     return FALSE;
                 }
 
-                (void) stackPop();
-            }
-            else if( STRING == getTokenTypeFromTokTab(psToken) )
-            {
-                if( TRUE != popuExprTreeOperand(STRING_TYPE) )
+                if( TRUE != popuExprTreeOperand(BOOL_TYPE) )
                 {
                     return FALSE;
                 }
 
+                (void) stackPop();
+            }
+            else if( STRING == getTokenTypeFromTokTab(psToken) )
+            {
                 /* Generate the code */
                 /* Remove the quotes from the string */
                 for( uiIndex = 1; uiIndex < strlen(psToken->pcToken)-1; uiIndex++ )
@@ -351,6 +343,11 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     return FALSE;
                 }
 
+                if( TRUE != popuExprTreeOperand(STRING_TYPE) )
+                {
+                    return FALSE;
+                }
+
                 (void) stackPop();
             }
             else if(0 == strcmp(psToken->pcToken, "("))
@@ -362,7 +359,6 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 if(0 != strcmp(psToken->pcToken, "-"))
                 {
                     *bIsTokIncrNeeded = FALSE;
-                    arrcBUnaryNegative[uiExprNestingCnt++] = FALSE;
                 }
                 else
                 {
@@ -370,7 +366,7 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         return FALSE;
                     }
-                    arrcBUnaryNegative[uiExprNestingCnt++] = TRUE;
+                    bIsUnaryNegative = TRUE;
                 }
             }
         } break;
@@ -379,17 +375,41 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             if( 0 == strcmp(psToken->pcToken, ")") )
             {
-                (void) stackPop();
+                sprintf(arrcStr, "    R[%u] = R[%u];\n", ++uiRegCount, uiExprEvalReg);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+
                 if( TRUE != popuExprTreeOperand(eExprEval) )
                 {
                     return FALSE;
                 }
+
+                (void) stackPop();
             }
             else if( TRUE == numbers(psToken) )
             {
                 /* Check if number is integer or float */
                 if( !strstr(psToken->pcToken, ".") )
                 {
+                    /* Generate the code */
+                    if(bIsUnaryNegative)
+                    {
+                        sprintf(arrcStr, "    R[%u] = -%s;\n", ++uiRegCount, psToken->pcToken);
+                    }
+                    else
+                    {
+                        sprintf(arrcStr, "    R[%u] = %s;\n", ++uiRegCount, psToken->pcToken);
+                    }
+                    bIsUnaryNegative = FALSE;
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+
                     dataType_t eOptional = UNDEFINED_TYPE;
                     if( (0 == strcmp(psToken->pcToken, "0")) || (0 == strcmp(psToken->pcToken, "1")) )
                     {
@@ -399,32 +419,11 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         return FALSE;
                     }
-
-                    /* Generate the code */
-                    if( TRUE == arrcBUnaryNegative[uiExprNestingCnt-1] )
-                    {
-                        sprintf(arrcStr, "    R[%u] = -%s;\n", ++uiRegCount, psToken->pcToken);
-                    }
-                    else
-                    {
-                        sprintf(arrcStr, "    R[%u] = %s;\n", ++uiRegCount, psToken->pcToken);
-                    }
-                    if( TRUE != genCodeInputString(arrcStr) )
-                    {
-                        bCodeGenErr = TRUE;
-                        return FALSE;
-                    }
-                    uiExprNestingCnt--;
                 }
                 else /* When number is float */
                 {
-                    if( TRUE != popuExprTreeOperand(FLOAT_TYPE) )
-                    {
-                        return FALSE;
-                    }
-
                     /* Generate the code */
-                    if( TRUE == arrcBUnaryNegative[uiExprNestingCnt-1] )
+                    if(bIsUnaryNegative)
                     {
                         sprintf(arrcStr, "    FLOAT_VAR = -%s;\n", psToken->pcToken);
                     }
@@ -432,6 +431,7 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     {
                         sprintf(arrcStr, "    FLOAT_VAR = %s;\n", psToken->pcToken);
                     }
+                    bIsUnaryNegative = FALSE;
                     if( TRUE != genCodeInputString(arrcStr) )
                     {
                         bCodeGenErr = TRUE;
@@ -443,7 +443,11 @@ bool_t factor( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                         bCodeGenErr = TRUE;
                         return FALSE;
                     }
-                    uiExprNestingCnt--;
+
+                    if( TRUE != popuExprTreeOperand(FLOAT_TYPE) )
+                    {
+                        return FALSE;
+                    }
                 }
                 (void) stackPop();
             }
@@ -595,7 +599,7 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
 
-                if( UNDEFINED_TYPE == (eExprEval = evalExprTree()) )
+                if( UNDEFINED_TYPE == (eExprEval = evalExprTree(&uiExprEvalReg)) )
                 {
                     return FALSE;
                 }
@@ -628,6 +632,7 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                     return FALSE;
                 }
                 eExprEval = UNDEFINED_TYPE;
+                uiExprEvalReg = 0;
 
                 if(EXPR_DEBUG_FLAG)
                 {
@@ -1049,8 +1054,10 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
 
         case 4:
         {
-            eParserState = NUMBERS;
-            *bIsTokIncrNeeded = FALSE;
+            if( TRUE != numbers(psToken) )
+            {
+                return FALSE;
+            }
             bIsTypeCheckSucc &= fillArrSize(psToken);
         } break;
 
