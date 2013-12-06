@@ -3,8 +3,9 @@ program rTest is
     string str2;
     integer num1;
     float num2;
+    integer a[2];
     begin
-        num2 := -4 * 4.0 + 3;
+        num2 := -4 * 4.0 + 3/a[1];
         putFloat(num2);
         getString(testStr, num1);
         putString(testStr);

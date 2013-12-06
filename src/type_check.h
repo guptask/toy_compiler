@@ -131,6 +131,9 @@ bool_t authArr( bool_t bIsArrNotDesired );
 /* Authenticate data type */
 bool_t authDataType();
 
+/* Fetch variable SP displacement */
+unsigned char fetchVarSPDisp();
+
 /* Fetch procedure name */
 char *fetchProcName();
 

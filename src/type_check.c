@@ -740,6 +740,17 @@ bool_t authDataType()
     return TRUE;
 }
 
+/* API: Fetch variable SP displacement */
+unsigned char fetchVarSPDisp()
+{
+    if(!psVariable)
+    {
+        printf("9.This error should not occur.\n");
+        return 0;
+    }
+    return psVariable->ucCallStkDisp;
+}
+
 /* API: Fetch procedure name */
 char *fetchProcName()
 {

@@ -73,7 +73,9 @@ static dataType_t eAssignStatement = UNDEFINED_TYPE;
 static unsigned char ucArgCnt      = 0;
 
 /* Code generation variables */
-bool_t bIsUnaryNegative            = FALSE;
+static bool_t bIsUnaryNegative     = FALSE;
+static unsigned int uiNameRegCnt   = 0;
+static dataType_t eVarDataType     = UNDEFINED_TYPE;
 
 
 /* Definition section */
@@ -219,12 +221,16 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 /* <name> ::= <identifier>['['<expression>']'] */
 bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     switch( sStack[uiTop-1].uiCount )
     {
         case 1:
         {
             eParserState = IDENTIFIERS;
             *bIsTokIncrNeeded = FALSE;
+            uiNameRegCnt = 0;
+            eVarDataType = UNDEFINED_TYPE;
         } break;
 
         case 2:
@@ -233,11 +239,30 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 return FALSE;
             }
+
+            /* Generate the code */
+            sprintf(arrcStr, "    R[%u] = MM[SP+%u];\n", ++uiRegCount, (unsigned int)fetchVarSPDisp());
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            if( TRUE != authDataType() )
+            {
+                return FALSE;
+            }
+            eVarDataType = fetchDataType();
+
             if(0 != strcmp(psToken->pcToken, "["))
             {
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
                 if( TRUE == authArr(TRUE) )
+                {
+                    return FALSE;
+                }
+                if( TRUE != popuExprTreeOperand(eVarDataType) )
                 {
                     return FALSE;
                 }
@@ -248,15 +273,8 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+                uiNameRegCnt = uiRegCount;
                 eParserState = EXPRESSION;
-            }
-            if( TRUE != authDataType() )
-            {
-                return FALSE;
-            }
-            if( TRUE != popuExprTreeOperand(fetchDataType()) )
-            {
-                return FALSE;
             }
         } break;
 
@@ -271,6 +289,41 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 printf("Array index can only be bool (converted into integer) or integer.\n");
                 return FALSE;
             }
+
+            /* Generate the code */
+            if( (eVarDataType == INTEGER_TYPE) || (eVarDataType == BOOL_TYPE) )
+            {
+                sprintf(arrcStr, "    R[%u] = *((int *)R[%u] + R[%u]);\n", 
+                                    uiNameRegCnt, uiNameRegCnt, uiRegCount);
+            } else if(eVarDataType == FLOAT_TYPE) {
+                sprintf(arrcStr, "    R[%u] = *((float *)R[%u] + R[%u]);\n", 
+                                    uiNameRegCnt, uiNameRegCnt, uiRegCount);
+            } else if(eVarDataType == STRING_TYPE) {
+                sprintf(arrcStr, "    R[%u] = *((char *)R[%u] + R[%u]);\n", 
+                                    uiNameRegCnt, uiNameRegCnt, uiRegCount);
+            } else {
+                printf("Undefined data type of array.\n");
+                return FALSE;
+            }
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            /* Offset the change in register count due to expression */
+            sprintf(arrcStr, "    R[%u] = R[%u];\n", ++uiRegCount, uiNameRegCnt);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            if( TRUE != popuExprTreeOperand(eVarDataType) )
+            {
+                return FALSE;
+            }
+
             (void) stackPop();
         } break;
 
