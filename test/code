@@ -44,7 +44,7 @@ program aProgram is
         end if;
 
         // for statement
-        for (a := 0; a<=10.1)
+        for (a := 0; a<=10)
             a := a+1;
             testing[a] := a+1;
         end for;

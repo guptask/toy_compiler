@@ -4,7 +4,7 @@ program rTest is
     integer num1;
     float num2;
     begin
-        num2 := -4.3;
+        num2 := -4 * 4.0 + 3;
         putFloat(num2);
         getString(testStr, num1);
         putString(testStr);
