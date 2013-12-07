@@ -250,7 +250,7 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
 
             /* Check for variable initialization */
-            if( (TRUE != fetchMemAlloStatus()) && ((uiNestingLevel > 1) && (TRUE != bIsGlobalVar)) &&
+            if( (TRUE != fetchMemAlloStatus()) && ((TRUE != bIsGlobalVar) || (uiNestingLevel == 1)) &&
                 ( (ucArgumentNum >= MAX_PROC_PARAM_CNT+1) || (TRUE != fetchOutParamStatus(ucArgumentNum)) )
               )
             {
@@ -261,9 +261,12 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             ucArgumentNum = MAX_PROC_PARAM_CNT+1;
 
             /* Set the memory allocation status to true for out parameters */
-            if( TRUE != fillMemAlloStatus() )
+            if( TRUE != bIsGlobalVar )
             {
-                return FALSE;
+                if( TRUE != fillMemAlloStatus() )
+                {
+                    return FALSE;
+                }
             }
 
             /* Generate the code */
