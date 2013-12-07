@@ -45,6 +45,7 @@ typedef struct variable_s
     char                *pcVarName;
     dataType_t          eDataType;
     char                *pcArrSize;
+    bool_t              bIsMemAllocated;
     bool_t              bIsParam;
     bool_t              bIsOutParam;
     unsigned char       ucCallStkDisp;
@@ -110,6 +111,9 @@ bool_t fillVarName( tokenListEntry_t *psNode );
 /* Fill arr size */
 bool_t fillArrSize( tokenListEntry_t *psNode );
 
+/* Fill memory allocation status */
+bool_t fillMemAlloStatus();
+
 /* Fill variable in or out */
 bool_t fillParamType( tokenListEntry_t *psNode );
 
@@ -128,11 +132,20 @@ bool_t authVar();
 /* Authenticate array */
 bool_t authArr( bool_t bIsArrNotDesired );
 
+/* Fetch array size */
+char *fetchArrSize();
+
 /* Authenticate data type */
 bool_t authDataType();
 
 /* Fetch variable SP displacement */
 unsigned char fetchVarSPDisp();
+
+/* Fetch memory allocation status */
+bool_t fetchMemAlloStatus();
+
+/* Fetch variable name */
+char *fetchVarName();
 
 /* Fetch procedure name */
 char *fetchProcName();
@@ -148,6 +161,9 @@ bool_t genRuntimeProcCode();
 
 /* Fetch parameter data type */
 dataType_t fetchParamDataType( unsigned char ucParamNum );
+
+/* Fetch out paramter status */
+bool_t fetchOutParamStatus( unsigned char ucParamNum );
 
 /* Authenticate procedure scope */
 bool_t authProc();

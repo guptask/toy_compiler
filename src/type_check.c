@@ -54,6 +54,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = INTEGER_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 0;
@@ -82,6 +83,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = BOOL_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 0;
@@ -110,6 +112,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = FLOAT_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 0;
@@ -138,6 +141,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = STRING_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 0;
@@ -153,6 +157,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = INTEGER_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = TRUE;
     psVar->ucCallStkDisp     = 1;
@@ -180,6 +185,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = INTEGER_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
     psVar->ucCallStkDisp     = 0;
@@ -208,6 +214,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = BOOL_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
     psVar->ucCallStkDisp     = 0;
@@ -236,6 +243,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = FLOAT_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
     psVar->ucCallStkDisp     = 0;
@@ -264,6 +272,7 @@ bool_t initTypeChecking()
     psVar->pcVarName         = NULL;
     psVar->eDataType         = STRING_TYPE;
     psVar->pcArrSize         = NULL;
+    psVar->bIsMemAllocated   = TRUE;
     psVar->bIsParam          = TRUE;
     psVar->bIsOutParam       = FALSE;
     psVar->ucCallStkDisp     = 0;
@@ -300,10 +309,11 @@ bool_t fillVarType( tokenListEntry_t *psToken )
         else if ( 0 == strcmp(psToken->pcToken,  "string") ) psTemp->eDataType = STRING_TYPE;
         else                                                 psTemp->eDataType = UNDEFINED_TYPE;
 
-        psTemp->pcArrSize     = NULL;
-        psTemp->bIsParam      = FALSE;
-        psTemp->bIsOutParam   = FALSE;
-        psTemp->ucCallStkDisp = 0;
+        psTemp->pcArrSize       = NULL;
+        psTemp->bIsMemAllocated = FALSE;
+        psTemp->bIsParam        = FALSE;
+        psTemp->bIsOutParam     = FALSE;
+        psTemp->ucCallStkDisp   = 0;
 
         if(uiNestingLevel == 1)
         {
@@ -470,6 +480,18 @@ bool_t fillArrSize( tokenListEntry_t *psToken )
     return TRUE;
 }
 
+/* API: Fill memory allocation status */
+bool_t fillMemAlloStatus()
+{
+    if( !psVariable )
+    {
+        printf("Internally something is wrong in variable addressing-3.\n");
+        return FALSE;
+    }
+    psVariable->bIsMemAllocated = TRUE;
+    return TRUE;
+}
+
 /* API: Fill variable in or out */
 bool_t fillParamType( tokenListEntry_t *psToken )
 {
@@ -481,13 +503,15 @@ bool_t fillParamType( tokenListEntry_t *psToken )
 
     if( 0 == strcmp(psToken->pcToken, "in") )
     {
-        psVariable->bIsParam    = TRUE;
-        psVariable->bIsOutParam = FALSE;
+        psVariable->bIsParam        = TRUE;
+        psVariable->bIsOutParam     = FALSE;
+        psVariable->bIsMemAllocated = TRUE;
     }
     else if( 0 == strcmp(psToken->pcToken, "out") )
     {
-        psVariable->bIsParam    = TRUE;
-        psVariable->bIsOutParam = TRUE;
+        psVariable->bIsParam        = TRUE;
+        psVariable->bIsOutParam     = TRUE;
+        psVariable->bIsMemAllocated = FALSE;
     }
     else
     {
@@ -620,13 +644,15 @@ char *fetchProgName()
 }
 
 /* API: Authenticate variable scope */
-bool_t authVar()
+bool_t authVar(bool_t *bIsGlobalVar)
 {
     procedure_t   *psProc     = NULL;
     bool_t        bRetStatus  = FALSE;
     unsigned char ucTempCount = 0;
     unsigned int  uiNestCount = 0;
     psVariable                = NULL;
+
+    *bIsGlobalVar = FALSE;
 
     if(uiNestingLevel < 1)
     {
@@ -690,6 +716,7 @@ bool_t authVar()
         {
             bRetStatus = TRUE;
             psVariable = psProgram->arrpsGlobalVar[ucTempCount];
+            *bIsGlobalVar = TRUE;
         }
     }
 
@@ -724,6 +751,17 @@ bool_t authArr( bool_t bIsArrNotDesired )
     return TRUE;
 }
 
+/* API: Fetch array size */
+char *fetchArrSize()
+{
+    if(!psVariable)
+    {
+        printf("12.This error should not occur.\n");
+        return NULL;
+    }
+    return psVariable->pcArrSize;
+}
+
 /* API: Authenticate data type */
 bool_t authDataType()
 {
@@ -749,6 +787,27 @@ unsigned char fetchVarSPDisp()
         return 0;
     }
     return psVariable->ucCallStkDisp;
+}
+
+/* API: Fetch memory allocation status */
+bool_t fetchMemAlloStatus()
+{
+    if(!psVariable)
+    {
+        printf("10.This error should not occur.\n");
+        return FALSE;
+    }
+    return psVariable->bIsMemAllocated;
+}
+
+/* API: Fetch variable name */
+char *fetchVarName()
+{
+    if(!psVariable)
+    {
+        return NULL;
+    }
+    return (psVariable->pcVarName);
 }
 
 /* API: Fetch procedure name */
@@ -819,6 +878,41 @@ dataType_t fetchParamDataType( unsigned char ucParamNum )
         printf("Invalid paramter number requested.\n");
     }
     return UNDEFINED_TYPE;
+}
+
+/* API: Fetch out parameter status */
+bool_t fetchOutParamStatus(unsigned char ucParamNum)
+{
+    unsigned char ucIndex = 0;
+    if(!psProcedure)
+    {
+        printf("11.This error should not occur.\n");
+        return FALSE;
+    }
+    if( !(psProcedure->ucVariableCnt) )
+    {
+        printf("Procedure has not arguments.\n");
+        return FALSE;
+    }
+
+    for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++)
+    {
+        if( ucParamNum-1 == ucIndex )
+        {
+            if(EXPR_DEBUG_FLAG)
+            {
+                printf( "Argument = '%s'(%d)\n", psProcedure->arrpsVariable[ucIndex]->pcVarName, 
+                                                    psProcedure->arrpsVariable[ucIndex]->eDataType );
+            }
+            return (psProcedure->arrpsVariable[ucIndex]->bIsOutParam);
+        }
+    }
+    if( (ucParamNum == 0) || (ucParamNum > ucIndex) )
+    {
+        printf("Invalid paramter number requested.\n");
+    }
+    return FALSE;
 }
 
 /* API: Generate the runtime procedure code */

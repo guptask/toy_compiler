@@ -19,12 +19,14 @@ program test is
         procedure newProc1(integer d in)
             integer f[10];
             begin
+                f[0] := 1;
                 testing[1+1] := c;
                 newProc1(f[2]);
                 return;
             end procedure;
         begin
             testing[1+1] := c;
+            f[1] := 1;
             newProc1(f[2]);
             return;
         end procedure;

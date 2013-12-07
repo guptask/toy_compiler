@@ -76,6 +76,12 @@ static unsigned char ucArgCnt      = 0;
 static bool_t bIsUnaryNegative     = FALSE;
 static unsigned int uiNameRegCnt   = 0;
 static dataType_t eVarDataType     = UNDEFINED_TYPE;
+static unsigned char ucVarSPDisp   = 0;
+static bool_t bIsMemAllotted       = FALSE;
+static unsigned char ucArgumentNum = MAX_PROC_PARAM_CNT+1;
+static char *pcArrSize             = NULL;
+static unsigned int uiArrIndexCnt  = 0;
+static bool_t bIsGlobalVariable    = FALSE;
 
 
 /* Definition section */
@@ -191,6 +197,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     {
         case 0:
         {
+            ucArgumentNum = MAX_PROC_PARAM_CNT+1;
             if( !(eExprEval & fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) )) )
             {
                 printf("Procedure '%s' signature mismatch.\n", fetchProcName());
@@ -211,6 +218,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 1:
         {
             eParserState = EXPRESSION;
+            ucArgumentNum = (unsigned char)((sStack[uiTop-1].uiCount + 1)/2);
             *bIsTokIncrNeeded = FALSE;
         } break;
     }
@@ -222,6 +230,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
     char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    bool_t bIsGlobalVar = FALSE;
 
     switch( sStack[uiTop-1].uiCount )
     {
@@ -235,7 +244,24 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
-            if(TRUE != authVar())
+            if(TRUE != authVar(&bIsGlobalVar))
+            {
+                return FALSE;
+            }
+
+            /* Check for variable initialization */
+            if( (TRUE != fetchMemAlloStatus()) && ((uiNestingLevel > 1) && (TRUE != bIsGlobalVar)) &&
+                ( (ucArgumentNum >= MAX_PROC_PARAM_CNT+1) || (TRUE != fetchOutParamStatus(ucArgumentNum)) )
+              )
+            {
+                printf("Bad habit!! Variable '%s' needs to be initialized before use.\n", fetchVarName());
+                ucArgumentNum = MAX_PROC_PARAM_CNT+1;
+                return FALSE;
+            }
+            ucArgumentNum = MAX_PROC_PARAM_CNT+1;
+
+            /* Set the memory allocation status to true for out parameters */
+            if( TRUE != fillMemAlloStatus() )
             {
                 return FALSE;
             }
@@ -656,6 +682,8 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+                eExprEval = eExprEval | INTEGER_TYPE;
+
                 if( TRUE != destroyExprTree() )
                 {
                     return FALSE;
@@ -871,6 +899,8 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 /* <assignment_statement> ::= [ '[' <expression> ']' ] ':=' <expression> */
 bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     switch( sStack[uiTop-1].uiCount )
     {
         case 1:
@@ -878,10 +908,12 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             eAssignStatement = UNDEFINED_TYPE;
 
             /* Autheticate the variable scope */
-            if(TRUE != authVar())
+            bIsGlobalVariable = FALSE;
+            if(TRUE != authVar(&bIsGlobalVariable))
             {
                 return FALSE;
             }
+
             if(0 == strcmp(psToken->pcToken, "["))
             {
                 if( TRUE != authArr(FALSE) )
@@ -909,6 +941,15 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
             }
             eAssignStatement = fetchDataType();
 
+            /* Set the memory allocation flag */
+            pcArrSize = fetchArrSize();
+            bIsMemAllotted = fetchMemAlloStatus();
+            if(TRUE != fillMemAlloStatus())
+            {
+                return FALSE;
+            }
+            ucVarSPDisp = fetchVarSPDisp();
+
         } break;
 
         case 2:
@@ -919,6 +960,29 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                 {
                     printf("Array index can only be bool(converted into integer) or integer.\n");
                     return FALSE;
+                }
+
+                /* Store the array index for future use */
+                if(pcArrSize)
+                {
+                    uiArrIndexCnt = uiRegCount;
+                }
+
+                /* Allocate the array memory */
+                if( (TRUE != bIsMemAllotted) && pcArrSize )
+                {
+                    sprintf(arrcStr, "    HP = HP - %s;\n", pcArrSize);
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                    sprintf(arrcStr, "    MM[SP+%u] = (int)&MM[HP];\n", (unsigned int)ucVarSPDisp);
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
                 }
             }
             else if(0 == strcmp(psToken->pcToken, ":="))
@@ -945,6 +1009,8 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
 
         case 4:
         {
+            pcArrSize = NULL;
+            uiArrIndexCnt = 0;
             if( !(eAssignStatement & eExprEval) )
             {
                 printf("Data type mismatch for left and right sides of assignment.\n");
@@ -1103,6 +1169,14 @@ bool_t variable_declaration( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                 (void) stackPop();
                 *bIsTokIncrNeeded = FALSE;
             }
+            else
+            {
+                if(STRING_TYPE == fetchDataType())
+                {
+                    printf("Sorry! The compiler currently does not support array of strings.\n");
+                    return FALSE;
+                }
+            }
         } break;
 
         case 4:
@@ -1224,7 +1298,7 @@ bool_t parameter( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     return TRUE;
 }
 
-/* <paramter_list> ::= <parameter>','<parameter_list> | <parameter> */
+/* <parameter_list> ::= <parameter>','<parameter_list> | <parameter> */
 bool_t parameter_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
     switch( (sStack[uiTop-1].uiCount)%2 )
