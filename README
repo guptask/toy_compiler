@@ -11,6 +11,14 @@ To test a sample code, type    : ./compile <code_sample>
 (code samples are present in 
 'test' directory)
 
+
+Special feature:
+---------------
+
+This compiler throws errors if it detects use of variables 
+before their initialization.
+
+
 Notes:
 -----
 
