@@ -10,6 +10,7 @@ program test is
     procedure newProc1(integer d in, integer b out)
         integer a[10];
         begin
+            c := 1;
             a[1+1] := d;
             return;
         end procedure;
@@ -37,7 +38,6 @@ program test is
         b := 2;
         d := 1;
         f := 1;
-        c := 1;
         testing[1] := (a * -b) + c*d + f;
 
         // if statement

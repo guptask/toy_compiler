@@ -254,7 +254,12 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 ( (ucArgumentNum >= MAX_PROC_PARAM_CNT+1) || (TRUE != fetchOutParamStatus(ucArgumentNum)) )
               )
             {
-                printf("Bad habit!! Variable '%s' needs to be initialized before use.\n", fetchVarName());
+                if(TRUE == bIsGlobalVar)
+                {
+                    printf("Global variable '%s' needs to be initialized in program body before using anywhere.\n", fetchVarName());
+                } else {
+                    printf("Bad habit!! Variable '%s' needs to be initialized before use.\n", fetchVarName());
+                }
                 ucArgumentNum = MAX_PROC_PARAM_CNT+1;
                 return FALSE;
             }
@@ -980,7 +985,14 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                         bCodeGenErr = TRUE;
                         return FALSE;
                     }
-                    sprintf(arrcStr, "    MM[SP+%u] = (int)&MM[HP];\n", (unsigned int)ucVarSPDisp);
+
+                    /* In case of global variable, SP = 0 */
+                    if( TRUE == bIsGlobalVariable )
+                    {
+                        sprintf(arrcStr, "    MM[%u] = (int)&MM[HP];\n", (unsigned int)ucVarSPDisp);
+                    } else {
+                        sprintf(arrcStr, "    MM[SP+%u] = (int)&MM[HP];\n", (unsigned int)ucVarSPDisp);
+                    }
                     if( TRUE != genCodeInputString(arrcStr) )
                     {
                         bCodeGenErr = TRUE;
@@ -1012,13 +1024,44 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
 
         case 4:
         {
-            pcArrSize = NULL;
-            uiArrIndexCnt = 0;
             if( !(eAssignStatement & eExprEval) )
             {
                 printf("Data type mismatch for left and right sides of assignment.\n");
                 return FALSE;
             }
+
+            if( !pcArrSize )
+            {
+                /* In case of global variable, SP = 0 */
+                if( TRUE == bIsGlobalVariable )
+                {
+                    sprintf(arrcStr, "    MM[%u] = R[%u];\n", (unsigned int)ucVarSPDisp, uiExprEvalReg);
+                } else {
+                    sprintf(arrcStr, "    MM[SP+%u] = R[%u];\n", (unsigned int)ucVarSPDisp, uiExprEvalReg);
+                }
+            }
+            else
+            {
+                /* In case of global variable, SP = 0 */
+                if( TRUE == bIsGlobalVariable )
+                {
+                    sprintf(arrcStr, "    *((int *)MM[%u]+R[%u]) = R[%u];\n", 
+                            (unsigned int)ucVarSPDisp, uiArrIndexCnt, uiExprEvalReg);
+                } else {
+                    sprintf(arrcStr, "    *((int *)MM[SP+%u]+R[%u]) = R[%u];\n", 
+                            (unsigned int)ucVarSPDisp, uiArrIndexCnt, uiExprEvalReg);
+                }
+            }
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            pcArrSize = NULL;
+            uiArrIndexCnt = 0;
+            ucVarSPDisp = 0;
+
             (void) stackPop();
             *bIsTokIncrNeeded = FALSE;
         } break;

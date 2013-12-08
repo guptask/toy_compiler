@@ -5,8 +5,8 @@ program rTest is
     float num2;
     integer a[2];
     begin
-        a[0] := 0;
-        num2 := -4 * 4.0 + 3/a[1];
+        a[1] := 2;
+        num2 := -4 * 4.0 + 3.0/a[1];
         putFloat(num2);
         getString(testStr, num1);
         putString(testStr);

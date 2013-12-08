@@ -80,7 +80,7 @@ static char arrcPutBool[NO_OF_PUT_BOOL_LINES][LENGTH_OF_EACH_LINE] = {
 
 /* getInteger() definition */
 static char arrcGetInteger[NO_OF_GET_INTEGER_LINES][LENGTH_OF_EACH_LINE] = {
-    "    R[0] = getBool();\n",
+    "    R[0] = getInteger();\n",
     "    MM[SP+0] = R[0];\n",
     "    R[0] = MM[SP+1];\n",
     "    goto *(void *)R[0];\n\n"
