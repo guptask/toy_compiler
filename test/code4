@@ -3,6 +3,9 @@ program loopTest is
     begin
         for (a := 0; a<10)
             a := a+1;
+            if(a <= 5) then
+                putInteger(a);
+            end if;
         end for;
         putInteger(a);
     end program

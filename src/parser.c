@@ -85,6 +85,7 @@ static bool_t bIsGlobalVariable    = FALSE;
 static bool_t arrbIsProcArgOut[MAX_PROC_PARAM_CNT] = {FALSE};
 static unsigned char ucOutParamCnt = 0;
 static unsigned int uiLoopCount    = 0;
+static unsigned int uiIfStmtCount  = 0;
 
 
 /* Definition section */
@@ -894,6 +895,8 @@ bool_t loop_statement( tokenListEntry_t *psToken )
  */
 bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     switch( (sStack[uiTop-1].uiCount) )
     {
         case 1:
@@ -915,11 +918,30 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 4:
         {
             if(0 != strcmp(psToken->pcToken, "then")) return FALSE;
+            sprintf(arrcStr, "    if(!R[%u]) goto _else_%u_;\n", 
+                                            uiExprEvalReg, ++uiIfStmtCount);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
             eParserState = STATEMENT;
         } break;
 
         case 5:
         {
+            sprintf(arrcStr, "    goto _exit_if_else_%u_;\n", uiIfStmtCount);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+            sprintf(arrcStr, "\n_else_%u_ :\n", uiIfStmtCount);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
             if(0 == strcmp(psToken->pcToken, "else"))
             {
                 eParserState = STATEMENT;
@@ -938,6 +960,12 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 7:
         {
             if(0 != strcmp(psToken->pcToken, "if")) return FALSE;
+            sprintf(arrcStr, "\n_exit_if_else_%u_ :\n", uiIfStmtCount--);
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
             (void) stackPop();
         } break;
 
