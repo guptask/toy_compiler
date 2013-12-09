@@ -1,14 +1,14 @@
 program rTest is
     string testStr;
     string str2;
-    integer num1;
+    integer num1[2];
     float num2;
     integer a[2];
     begin
         a[1] := 2;
         num2 := -4 * 4.0 + 3.0/a[1];
         putFloat(num2);
-        getString(testStr, num1);
+        getString(testStr, num1[1]);
         putString(testStr);
         str2 := "univ_of_cincinnati";
         putString(str2);

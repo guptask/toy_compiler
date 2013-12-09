@@ -82,6 +82,8 @@ static unsigned char ucArgumentNum = MAX_PROC_PARAM_CNT+1;
 static char *pcArrSize             = NULL;
 static unsigned int uiArrIndexCnt  = 0;
 static bool_t bIsGlobalVariable    = FALSE;
+static bool_t arrbIsProcArgOut[MAX_PROC_PARAM_CNT] = {FALSE};
+static unsigned char ucOutParamCnt = 0;
 
 
 /* Definition section */
@@ -204,10 +206,18 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 return FALSE;
             }
             ucArgCnt--;
+
             if( TRUE != writeProcArgs( (unsigned char)(((sStack[uiTop-1].uiCount)/2))-1) )
             {
                 return FALSE;
             }
+            
+            if( TRUE == arrbIsProcArgOut[((sStack[uiTop-1].uiCount)/2)-1] )
+            {
+                ucOutParamCnt++;
+                arrbIsProcArgOut[((sStack[uiTop-1].uiCount)/2)-1] = FALSE;
+            }
+
             if(0 != strcmp(psToken->pcToken, ","))
             {
                 *bIsTokIncrNeeded = FALSE;
@@ -219,6 +229,10 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = EXPRESSION;
             ucArgumentNum = (unsigned char)((sStack[uiTop-1].uiCount + 1)/2);
+            if(ucArgumentNum == 1)
+            {
+                ucOutParamCnt = 0;
+            }
             *bIsTokIncrNeeded = FALSE;
         } break;
     }
@@ -263,7 +277,6 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 ucArgumentNum = MAX_PROC_PARAM_CNT+1;
                 return FALSE;
             }
-            ucArgumentNum = MAX_PROC_PARAM_CNT+1;
 
             /* Set the memory allocation status to true for out parameters */
             if( TRUE != bIsGlobalVar )
@@ -1092,7 +1105,7 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
-            ucArgCnt = fetchParamCnt();
+            ucArgCnt = fetchParamCnt(arrbIsProcArgOut);
             if( (0 == strcmp(psToken->pcToken, ")")) && ucArgCnt )
             {
                 return FALSE;
@@ -1115,6 +1128,7 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 return FALSE;
             }
             (void) stackPop();
+
         } break;
 
         default: return FALSE;

@@ -154,7 +154,7 @@ char *fetchProcName();
 dataType_t fetchDataType();
 
 /* Fetch parameter count */
-unsigned char fetchParamCnt();
+unsigned char fetchParamCnt( bool_t *arrbIsProcArgOut );
 
 /* Generate the runtime procedure code */
 bool_t genRuntimeProcCode();

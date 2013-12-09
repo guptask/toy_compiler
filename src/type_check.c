@@ -832,7 +832,7 @@ dataType_t fetchDataType()
 }
 
 /* API: Fetch parameter count */
-unsigned char fetchParamCnt()
+unsigned char fetchParamCnt( bool_t *arrbIsProcArgOut )
 {
     unsigned char ucIndex = 0;
     if(!psProcedure)
@@ -841,7 +841,10 @@ unsigned char fetchParamCnt()
         return -1;
     }
     for( ucIndex = 0; (ucIndex < psProcedure->ucVariableCnt) &&
-                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++);
+                        (TRUE == psProcedure->arrpsVariable[ucIndex]->bIsParam); ucIndex++)
+    {
+        arrbIsProcArgOut[ucIndex] = psProcedure->arrpsVariable[ucIndex]->bIsOutParam;
+    }
     return ucIndex;
 }
 
@@ -1600,6 +1603,12 @@ bool_t writeProcArgs( unsigned char ucArgSPDisp )
     }
     else /* when argument is an out paramter */
     {
+        sprintf(arrcStr, "    R[%u] = (int) &MM[SP+%d];\n", ++uiRegCount, (int)ucArgSPDisp);
+        if( TRUE != genCodeInputString(arrcStr) )
+        {
+            bCodeGenErr = TRUE;
+            return FALSE;
+        }
     }
 
     return TRUE;
