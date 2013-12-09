@@ -1,0 +1,8 @@
+program loopTest is
+    integer a;
+    begin
+        for (a := 0; a<10)
+            a := a+1;
+        end for;
+        putInteger(a);
+    end program
