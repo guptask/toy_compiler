@@ -18,7 +18,7 @@ program loopTest is
                 putInteger(a*b);
             end if;
             c := 1;
-            c := a < c;
+            c := a == c;
             putBool(c);
         end for;
         putInteger(b);
