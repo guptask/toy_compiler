@@ -15,16 +15,11 @@
 /* Procedure */
 
 /* Check boolean operation at runtime */
-void boolOpRuntimeChk( int iLeft, int iRight, unsigned int uiLineNum )
+void booleanRuntimeChk(int iVal, unsigned int uiLineNum)
 {
-    if( (0 != iLeft) && (1 != iLeft) )
+    if( (0 != iVal) && (1 != iVal) )
     {
-        printf("Error: Line %u: Illegal boolean value %d.\n", uiLineNum, iLeft);
-        exit(EXIT_FAILURE);
-    }
-    if( (0 != iRight) && (1 != iRight) )
-    {
-        printf("Error: Line %u: Illegal boolean value %d.\n", uiLineNum, iRight);
+        printf("Error: Line %u: Illegal boolean value %d.\n", uiLineNum, iVal);
         exit(EXIT_FAILURE);
     }
 };

@@ -199,16 +199,32 @@ bool_t numbers( tokenListEntry_t *psToken )
 */
 bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    dataType_t eDataType = UNDEFINED_TYPE;
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     switch( (sStack[uiTop-1].uiCount)%2 )
     {
         case 0:
         {
             ucArgumentNum = MAX_PROC_PARAM_CNT+1;
-            if( !(eExprEval & fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) )) )
+            eDataType = fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) );
+            if( !(eExprEval & eDataType) )
             {
                 printf("Procedure '%s' signature mismatch.\n", fetchProcName());
                 return FALSE;
             }
+
+            /* Generate the runtime boolean check code */
+            if(eDataType == BOOL_TYPE)
+            {
+                sprintf(arrcStr, "    booleanRuntimeChk( R[%u], %u );\n", uiExprEvalReg, psToken->uiLineNum);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
+            }
+
             ucArgCnt--;
 
             if( TRUE != writeProcArgs( (unsigned char)(((sStack[uiTop-1].uiCount)/2))-1) )
@@ -313,6 +329,18 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 {
                     return FALSE;
                 }
+
+                /* Generate the runtime boolean check code */
+                if(eVarDataType == BOOL_TYPE)
+                {
+                    sprintf(arrcStr, "    booleanRuntimeChk( R[%u], %u );\n", uiRegCount, psToken->uiLineNum);
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                }
+
                 if( TRUE != popuExprTreeOperand(eVarDataType) )
                 {
                     return FALSE;
@@ -368,6 +396,17 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
+            }
+
+            /* Generate the runtime boolean check code */
+            if(eVarDataType == BOOL_TYPE)
+            {
+                sprintf(arrcStr, "    booleanRuntimeChk( R[%u], %u );\n", uiRegCount, psToken->uiLineNum);
+                if( TRUE != genCodeInputString(arrcStr) )
+                {
+                    bCodeGenErr = TRUE;
+                    return FALSE;
+                }
             }
 
             if( TRUE != popuExprTreeOperand(eVarDataType) )
@@ -982,7 +1021,7 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 /* <assignment_statement> ::= [ '[' <expression> ']' ] ':=' <expression> */
 bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
-    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0}, arrcTmp[LENGTH_OF_EACH_LINE] = {0};
 
     switch( sStack[uiTop-1].uiCount )
     {
@@ -1111,8 +1150,18 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                 if( TRUE == bIsGlobalVariable )
                 {
                     sprintf(arrcStr, "    MM[%u] = R[%u];\n", (unsigned int)ucVarSPDisp, uiExprEvalReg);
+                    if(eAssignStatement == BOOL_TYPE)
+                    {
+                        sprintf(arrcTmp, "    booleanRuntimeChk( MM[%u], %u );\n", 
+                                    (unsigned int)ucVarSPDisp, psToken->uiLineNum);
+                    }
                 } else {
                     sprintf(arrcStr, "    MM[SP+%u] = R[%u];\n", (unsigned int)ucVarSPDisp, uiExprEvalReg);
+                    if(eAssignStatement == BOOL_TYPE)
+                    {
+                        sprintf(arrcTmp, "    booleanRuntimeChk( MM[SP+%u], %u );\n", 
+                                    (unsigned int)ucVarSPDisp, psToken->uiLineNum);
+                    }
                 }
             }
             else
@@ -1126,8 +1175,19 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                     sprintf(arrcStr, "    *((int *)MM[SP+%u]+R[%u]) = R[%u];\n", 
                             (unsigned int)ucVarSPDisp, uiArrIndexCnt, uiExprEvalReg);
                 }
+
+                if(eAssignStatement == BOOL_TYPE)
+                {
+                    sprintf(arrcTmp, "    booleanRuntimeChk( R[%u], %u );\n", uiExprEvalReg, psToken->uiLineNum);
+                }
             }
             if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            if( (BOOL_TYPE == eAssignStatement) && (TRUE != genCodeInputString(arrcTmp)) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
