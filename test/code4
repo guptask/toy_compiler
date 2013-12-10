@@ -1,5 +1,6 @@
 program loopTest is
     integer a;
+    integer b;
     begin
         for (a := 0; a<10)
             a := a+1;
@@ -8,4 +9,13 @@ program loopTest is
             end if;
         end for;
         putInteger(a);
+        for (b := 0; b<10)
+            b := b+2;
+            if(b <= 5) then
+                putInteger(b);
+            else
+                putInteger(b*10);
+            end if;
+        end for;
+        putInteger(b);
     end program

@@ -85,7 +85,9 @@ static bool_t bIsGlobalVariable    = FALSE;
 static bool_t arrbIsProcArgOut[MAX_PROC_PARAM_CNT] = {FALSE};
 static unsigned char ucOutParamCnt = 0;
 static unsigned int uiLoopCount    = 0;
+static tokenListEntry_t *arrpsLoopId[MAX_LOOP_NEST_CNT];
 static unsigned int uiIfStmtCount  = 0;
+static tokenListEntry_t *arrpsIfStmtId[MAX_IF_ELSE_NEST_CNT];
 
 
 /* Definition section */
@@ -836,7 +838,8 @@ bool_t loop_statement( tokenListEntry_t *psToken )
         case 4:
         {
             if(0 != strcmp(psToken->pcToken, ";")) return FALSE;
-            sprintf(arrcStr, "\n_loop_%u_ :\n", ++uiLoopCount);
+            arrpsLoopId[uiLoopCount++] = psToken;
+            sprintf(arrcStr, "\n_loop_%p_ :\n", arrpsLoopId[uiLoopCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
@@ -848,8 +851,8 @@ bool_t loop_statement( tokenListEntry_t *psToken )
         case 5:
         {
             if(0 != strcmp(psToken->pcToken, ")")) return FALSE;
-            sprintf(arrcStr, "    if(!R[%u]) goto _exit_loop_%u_;\n", 
-                                            uiExprEvalReg, uiLoopCount);
+            sprintf(arrcStr, "    if(!R[%u]) goto _exit_loop_%p_;\n", 
+                                            uiExprEvalReg, arrpsLoopId[uiLoopCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
@@ -866,14 +869,14 @@ bool_t loop_statement( tokenListEntry_t *psToken )
         case 7:
         {
             if(0 != strcmp(psToken->pcToken, "for")) return FALSE;
-            sprintf(arrcStr, "    goto _loop_%u_;\n\n", uiLoopCount);
+            sprintf(arrcStr, "    goto _loop_%p_;\n\n", arrpsLoopId[uiLoopCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
             }
 
-            sprintf(arrcStr, "_exit_loop_%u_ :\n", uiLoopCount--);
+            sprintf(arrcStr, "_exit_loop_%p_ :\n", arrpsLoopId[--uiLoopCount]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
@@ -918,8 +921,9 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 4:
         {
             if(0 != strcmp(psToken->pcToken, "then")) return FALSE;
-            sprintf(arrcStr, "    if(!R[%u]) goto _else_%u_;\n", 
-                                            uiExprEvalReg, ++uiIfStmtCount);
+            arrpsIfStmtId[uiIfStmtCount++] = psToken;
+            sprintf(arrcStr, "    if(!R[%u]) goto _else_%p_;\n", 
+                        uiExprEvalReg, arrpsIfStmtId[uiIfStmtCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
@@ -930,13 +934,13 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 5:
         {
-            sprintf(arrcStr, "    goto _exit_if_else_%u_;\n", uiIfStmtCount);
+            sprintf(arrcStr, "    goto _exit_if_else_%p_;\n", arrpsIfStmtId[uiIfStmtCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
                 return FALSE;
             }
-            sprintf(arrcStr, "\n_else_%u_ :\n", uiIfStmtCount);
+            sprintf(arrcStr, "\n_else_%p_ :\n", arrpsIfStmtId[uiIfStmtCount-1]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
@@ -960,7 +964,7 @@ bool_t if_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 7:
         {
             if(0 != strcmp(psToken->pcToken, "if")) return FALSE;
-            sprintf(arrcStr, "\n_exit_if_else_%u_ :\n", uiIfStmtCount--);
+            sprintf(arrcStr, "\n_exit_if_else_%p_ :\n", arrpsIfStmtId[--uiIfStmtCount]);
             if( TRUE != genCodeInputString(arrcStr) )
             {
                 bCodeGenErr = TRUE;
