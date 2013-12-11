@@ -192,11 +192,13 @@ bool_t writeProcLabel();
 bool_t writeProcReturn();
 
 /* Generate the code for procedure argument */
-bool_t writeProcArgs( unsigned char ucArgSPDisp );
+bool_t writeProcArgs( unsigned int uiEvalRegCnt, unsigned char ucArgSPDisp );
 
 /* Generate the code for procedure call */
 bool_t writeProcCall( tokenListEntry_t *psNode );
 
+/* Generate the code for decrementing SP */
+bool_t writeDecrementSP();
 
 #endif /* TYPE_CHECK_H_ */
 

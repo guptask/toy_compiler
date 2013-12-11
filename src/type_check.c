@@ -16,7 +16,6 @@ static exprTree_t    *expressionTree[MAX_EXPR_TREE_ARR_LEN];
 static variable_t    *psVariable  = NULL;
 static procedure_t   *psProcedure = NULL;
 static unsigned char ucSPDisplacement = 0;
-static bool_t        bIsSPChangeNeeded = FALSE;
 
 /* API: Type check init */
 bool_t initTypeChecking()
@@ -969,7 +968,6 @@ bool_t authProc()
                 bRetStatus = TRUE;
                 psProcedure = psProgram->arrpsLocalProc[ucTempCount];
                 ucSPDisplacement = psProgram->ucLocalVarCnt + psProgram->ucGlobalVarCnt + 1;
-                bIsSPChangeNeeded = TRUE;
                 break;
             }
         }
@@ -1006,7 +1004,6 @@ bool_t authProc()
                 bRetStatus = TRUE;
                 psProcedure = psProc->arrpsIntrnlProc[ucTempCount];
                 ucSPDisplacement = psProc->ucVariableCnt + 1;
-                bIsSPChangeNeeded = TRUE;
                 break;
             }
         }
@@ -1017,7 +1014,6 @@ bool_t authProc()
             bRetStatus = TRUE;
             psProcedure = psProc;
             ucSPDisplacement = psProc->ucVariableCnt + 1;
-            bIsSPChangeNeeded = TRUE;
         }
     }
 
@@ -1029,7 +1025,6 @@ bool_t authProc()
             bRetStatus = TRUE;
             psProcedure = psProgram->arrpsGlobalProc[ucTempCount];
             ucSPDisplacement = psProgram->ucLocalVarCnt + psProgram->ucGlobalVarCnt + 1;
-            bIsSPChangeNeeded = TRUE;
         }
     }
 
@@ -1575,42 +1570,33 @@ bool_t writeProcReturn()
 }
 
 /* API: Generate the code for procedure argument */
-bool_t writeProcArgs( unsigned char ucArgSPDisp )
+bool_t writeProcArgs( unsigned int uiEvalRegCnt, unsigned char ucArgSPDisp )
 {
     char arrcStr[LENGTH_OF_EACH_LINE] = {0};
-
-    /* Generate the code */
-    if( TRUE == bIsSPChangeNeeded )
-    {
-        sprintf(arrcStr, "    SP = SP + %d;\n", (int)ucSPDisplacement);
-        if( TRUE != genCodeInputString(arrcStr) )
-        {
-            bCodeGenErr = TRUE;
-            return FALSE;
-        }
-        bIsSPChangeNeeded = FALSE;
-    }
 
     /* If argument is an 'in' parameter */
     if( TRUE != psProcedure->arrpsVariable[ucArgSPDisp]->bIsOutParam )
     {
-        sprintf(arrcStr, "    MM[SP + %d] = R[%u];\n", (int)ucArgSPDisp, uiRegCount);
+        sprintf(arrcStr, "    MM[(SP+%u) + %d] = R[%u];\n", 
+                (unsigned int) ucSPDisplacement, (int)ucArgSPDisp, uiEvalRegCnt);
         if( TRUE != genCodeInputString(arrcStr) )
         {
             bCodeGenErr = TRUE;
             return FALSE;
         }
     }
+#if 0
     else /* when argument is an out paramter */
     {
-        sprintf(arrcStr, "    R[%u] = (int) &MM[SP+%d];\n", ++uiRegCount, (int)ucArgSPDisp);
+        sprintf(arrcStr, "    R[%u] = (int) &MM[(SP+%u)+%d];\n", 
+                ++uiRegCount, (unsigned int) ucSPDisplacement, (int)ucArgSPDisp);
         if( TRUE != genCodeInputString(arrcStr) )
         {
             bCodeGenErr = TRUE;
             return FALSE;
         }
     }
-
+#endif
     return TRUE;
 }
 
@@ -1618,6 +1604,14 @@ bool_t writeProcArgs( unsigned char ucArgSPDisp )
 bool_t writeProcCall( tokenListEntry_t *psToken )
 {
     char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
+    /* Generate the code */
+    sprintf(arrcStr, "    SP = SP + %d;\n", (int)ucSPDisplacement);
+    if( TRUE != genCodeInputString(arrcStr) )
+    {
+        bCodeGenErr = TRUE;
+        return FALSE;
+    }
 
     /* Generate the code */
     sprintf(arrcStr, "    MM[SP + %d] = (int)&&_return_from_%s_%p_;\n", 
@@ -1641,7 +1635,14 @@ bool_t writeProcCall( tokenListEntry_t *psToken )
         bCodeGenErr = TRUE;
         return FALSE;
     }
-    arrcStr[0] = 0;
+    return TRUE;
+}
+
+/* API: Generate the code for decrementing SP */
+bool_t writeDecrementSP()
+{
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+
     sprintf(arrcStr, "    SP = SP - %d;\n", (int)ucSPDisplacement);
     if( TRUE != genCodeInputString(arrcStr) )
     {

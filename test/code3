@@ -6,6 +6,7 @@ program rTest is
     integer a[2];
     begin
         a[1] := 2;
+        num1[0] := 1;
         num2 := -4 * 4.0 + 3.0/a[1];
         putFloat(num2);
         getString(testStr, num1[1]);
