@@ -1,15 +1,14 @@
-program rTest is
+program exprStrRuntimeTest is
     string testStr;
     string str2;
-    integer num1[2];
+    integer num1;
     float num2;
     integer a[2];
     begin
         a[1] := 2;
-        num1[0] := 1;
         num2 := -4 * 4.0 + 3.0/a[1];
         putFloat(num2);
-        getString(testStr, num1[1]);
+        getString(testStr, num1);
         putString(testStr);
         str2 := "univ_of_cincinnati";
         putString(str2);

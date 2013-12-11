@@ -1,4 +1,4 @@
-program loopTest is
+program loopAndIfTest is
     integer a;
     integer b;
     bool c;

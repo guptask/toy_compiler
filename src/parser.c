@@ -34,6 +34,7 @@ typedef enum parserState_e
     TERM,
     FACTOR,
     NAME,
+    OUT_PARAM,
     ARGUMENT_LIST,
     NUMBERS,
     MAX_STATE_NUM
@@ -83,11 +84,13 @@ static char *pcArrSize             = NULL;
 static unsigned int uiArrIndexCnt  = 0;
 static bool_t bIsGlobalVariable    = FALSE;
 static bool_t arrbIsProcArgOut[MAX_PROC_PARAM_CNT] = {FALSE};
-static unsigned char ucOutParamCnt = 0;
+static unsigned char ucArgTempCnt  = 0;
 static unsigned int uiLoopCount    = 0;
 static tokenListEntry_t *arrpsLoopId[MAX_LOOP_NEST_CNT];
 static unsigned int uiIfStmtCount  = 0;
 static tokenListEntry_t *arrpsIfStmtId[MAX_IF_ELSE_NEST_CNT];
+static unsigned int arruiArgRegCnt[MAX_PROC_PARAM_CNT];
+static bool_t bIsArgOut            = FALSE;
 
 
 /* Definition section */
@@ -207,6 +210,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         case 0:
         {
             ucArgumentNum = MAX_PROC_PARAM_CNT+1;
+            bIsArgOut = FALSE;
             eDataType = fetchParamDataType( (unsigned char)((sStack[uiTop-1].uiCount)/2) );
             if( !(eExprEval & eDataType) )
             {
@@ -225,7 +229,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
                 }
             }
 
-            ucArgCnt--;
+            ucArgTempCnt++;
 
             if( TRUE != writeProcArgs( uiExprEvalReg, (unsigned char)(((sStack[uiTop-1].uiCount)/2))-1) )
             {
@@ -234,8 +238,7 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             
             if( TRUE == arrbIsProcArgOut[((sStack[uiTop-1].uiCount)/2)-1] )
             {
-                ucOutParamCnt++;
-                arrbIsProcArgOut[((sStack[uiTop-1].uiCount)/2)-1] = FALSE;
+                arruiArgRegCnt[ucArgTempCnt-1] = uiRegCount;
             }
 
             if(0 != strcmp(psToken->pcToken, ","))
@@ -249,10 +252,8 @@ bool_t argument_list( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
         {
             eParserState = EXPRESSION;
             ucArgumentNum = (unsigned char)((sStack[uiTop-1].uiCount + 1)/2);
-            if(ucArgumentNum == 1)
-            {
-                ucOutParamCnt = 0;
-            }
+            if(ucArgumentNum == 1) ucArgTempCnt = 0;
+            if(arrbIsProcArgOut[ucArgTempCnt] == TRUE) bIsArgOut = TRUE;
             *bIsTokIncrNeeded = FALSE;
         } break;
     }
@@ -421,6 +422,99 @@ bool_t name( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
     }
 
     return TRUE;
+}
+
+/* <out_param> ::= <identifier> */
+bool_t out_param( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
+{
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    bool_t bIsGlobalVar = FALSE;
+
+    switch( sStack[uiTop-1].uiCount )
+    {
+        case 1:
+        {
+            eParserState = IDENTIFIERS;
+            *bIsTokIncrNeeded = FALSE;
+            eVarDataType = UNDEFINED_TYPE;
+        } break;
+
+        case 2:
+        {
+            if(TRUE != authVar(&bIsGlobalVar))
+            {
+                return FALSE;
+            }
+
+            /* Check for variable initialization */
+            if( (TRUE != fetchMemAlloStatus()) && ((TRUE != bIsGlobalVar) || (uiNestingLevel == 1)) &&
+                ( (ucArgumentNum >= MAX_PROC_PARAM_CNT+1) || (TRUE != fetchOutParamStatus(ucArgumentNum)) )
+              )
+            {
+                if(TRUE == bIsGlobalVar)
+                {
+                    printf("Global variable '%s' needs to be initialized in program body before using anywhere.\n", fetchVarName());
+                } else {
+                    printf("Bad habit!! Variable '%s' needs to be initialized before use.\n", fetchVarName());
+                }
+                ucArgumentNum = MAX_PROC_PARAM_CNT+1;
+                return FALSE;
+            }
+
+            /* Set the memory allocation status to true for out parameters */
+            if( TRUE != bIsGlobalVar )
+            {
+                if( TRUE != fillMemAlloStatus() )
+                {
+                    return FALSE;
+                }
+            }
+
+            /* Generate the code */
+            sprintf(arrcStr, "    R[%u] = (int)&MM[SP+%u];\n", ++uiRegCount, (unsigned int)fetchVarSPDisp());
+            if( TRUE != genCodeInputString(arrcStr) )
+            {
+                bCodeGenErr = TRUE;
+                return FALSE;
+            }
+
+            if( TRUE != authDataType() )
+            {
+                return FALSE;
+            }
+            eVarDataType = fetchDataType();
+
+            if(0 != strcmp(psToken->pcToken, "["))
+            {
+                if( TRUE == authArr(TRUE) )
+                {
+                    return FALSE;
+                }
+
+                if( TRUE != popuExprTreeOperand(eVarDataType) )
+                {
+                    return FALSE;
+                }
+            }
+            else
+            {
+                if( TRUE != authArr(FALSE) )
+                {
+                    return FALSE;
+                }
+                printf("Compiler does not have support for out param array. Sorry.\n");
+                return FALSE;
+            }
+            (void) stackPop();
+            *bIsTokIncrNeeded = FALSE;
+        } break;
+
+        default: return FALSE;
+    }
+
+    return TRUE;
+
+
 }
 
 /* <factor> ::=   '(' <expression> ')'
@@ -761,6 +855,11 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
             else
             {
+                if(bIsArgOut == TRUE)
+                {
+                    printf("Operator '%s' not allowed for out param.\n", psToken->pcToken);
+                    return FALSE;
+                }
                 if( TRUE != popuExprTreeOperator(psToken->pcToken, FALSE) )
                 {
                     return FALSE;
@@ -791,6 +890,11 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
             }
             else
             {
+                if(bIsArgOut == TRUE)
+                {
+                    printf("Operator '%s' not allowed for out param.\n", psToken->pcToken);
+                    return FALSE;
+                }
                 if( TRUE != popuExprTreeOperator(psToken->pcToken, TRUE) )
                 {
                     return FALSE;
@@ -800,7 +904,12 @@ bool_t expression( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 2:
         {
-            eParserState = ARITH_OP;
+            if(bIsArgOut == TRUE)
+            {
+                eParserState = OUT_PARAM;
+            } else {
+                eParserState = ARITH_OP;
+            }
             *bIsTokIncrNeeded = FALSE;
         } break;
     }
@@ -1215,6 +1324,9 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
 /* <procedure_call> ::= '(' [<argument_list>] ')' */
 bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 {
+    char arrcStr[LENGTH_OF_EACH_LINE] = {0};
+    unsigned char ucIndex = 0;
+
     switch( sStack[uiTop-1].uiCount )
     {
         case 1:
@@ -1246,14 +1358,30 @@ bool_t procedure_call( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded )
 
         case 3:
         {
-            if( (ucArgCnt) || (0 != strcmp(psToken->pcToken, ")")) )
+            if( (ucArgCnt != ucArgTempCnt) || (0 != strcmp(psToken->pcToken, ")")) )
             {
                 return FALSE;
             }
+            ucArgCnt = 0;
             if( TRUE != writeProcCall(psToken) )
             {
                 return FALSE;
             }
+
+            for(ucIndex = 0; ucIndex < ucArgTempCnt; ucIndex++)
+            {
+                if(arrbIsProcArgOut[ucIndex] == TRUE)
+                {
+                    sprintf(arrcStr, "    *((int *)R[%u]) = MM[SP+%u];\n", 
+                            arruiArgRegCnt[ucIndex], (unsigned int)ucIndex);
+                    if( TRUE != genCodeInputString(arrcStr) )
+                    {
+                        bCodeGenErr = TRUE;
+                        return FALSE;
+                    }
+                }
+            }
+
             if( TRUE != writeDecrementSP() )
             {
                 return FALSE;
@@ -2031,6 +2159,12 @@ bool_t parse( tokenListEntry_t *psTokenList )
             {
                 if(DEBUG_FLAG) printf("name: %s\n", psTempList->pcToken);
                 bIsRetSucc = name( psTempList, &bIsIncrNeeded );
+            } break;
+
+            case OUT_PARAM:
+            {
+                if(DEBUG_FLAG) printf("out_param: %s\n", psTempList->pcToken);
+                bIsRetSucc = out_param( psTempList, &bIsIncrNeeded );
             } break;
 
             case ARGUMENT_LIST:
