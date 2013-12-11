@@ -1425,7 +1425,13 @@ bool_t statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded, bool_t bI
                 eParserState = LOOP_STATEMENT;
                 *bIsTokIncrNeeded = FALSE;
             }
-            else if(0 == strcmp(psToken->pcToken, "return")) {}
+            else if(0 == strcmp(psToken->pcToken, "return"))
+            {
+                if( TRUE != writeProcReturn() )
+                {
+                    return FALSE;
+                }
+            }
             else if (TRUE == identifiers(psToken, FALSE))
             {
                 eParserState = ASSIGN_OR_PROC_CALL;

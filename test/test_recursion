@@ -1,0 +1,29 @@
+program recursionTest is
+    integer recRes;
+
+    procedure rec(integer n in, integer res out)
+        integer a;
+        integer b;
+        begin
+            if(n < 0) then
+                res := -1;
+                return;
+            end if;
+            if(n == 0) then
+                res := 0;
+                return;
+            end if;
+            if(n == 1) then
+                res := 1;
+                return;
+            end if;
+            rec(n-1,a);
+            rec(n-2,b);
+            res := a+b;
+        end procedure;
+
+    begin
+        rec(17, recRes);
+        putInteger(recRes);
+    end program
+
