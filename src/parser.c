@@ -1093,6 +1093,11 @@ bool_t assignment_statement( tokenListEntry_t *psToken, bool_t *bIsTokIncrNeeded
                 /* Allocate the array memory */
                 if( (TRUE != bIsMemAllotted) && pcArrSize )
                 {
+                    if(uiLoopCount != 0)
+                    {
+                        printf("Array has to be initialized before start of loop.\n");
+                        return FALSE;
+                    }
                     sprintf(arrcStr, "    HP = HP - %s;\n", pcArrSize);
                     if( TRUE != genCodeInputString(arrcStr) )
                     {
