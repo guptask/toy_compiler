@@ -22,13 +22,16 @@ before their initialization.
 Notes:
 -----
 
-1. For special cases not mentioned in guidelines, C-type 
+1. Project specifications and grammar details are present 
+   in 'doc' directory.
+
+2. For special cases not mentioned in guidelines, C-type 
    rules have been followed eg. re-using of local variable 
    names in different procedures, etc.
 
-2. GCC version 4.7.2 used during development.
+3. GCC version 4.7.2 used during development.
 
-3. Runtime library procedures (used in code samples) are:
+4. Runtime library procedures (used in code samples) are:
    :- getInteger(integer a out)
    :- getBool(bool a out)
    :- getFloat(float a out)
